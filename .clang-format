@@ -1,0 +1,54 @@
+BasedOnStyle: WebKit  # Since you are using WebKit as the base style
+IndentWidth: 4        # Use 4 spaces for indentation
+TabWidth: 4
+UseTab: Never         # Always use spaces instead of tabs
+
+BreakBeforeBraces: Custom # Attach opening braces to class/method definitions
+BraceWrapping:
+  AfterClass: false
+  AfterControlStatement: false
+  AfterEnum: false
+  AfterFunction: true
+  AfterNamespace: false
+  AfterStruct: false
+  AfterUnion: false
+  AfterExternBlock: false
+  BeforeCatch: false
+  BeforeElse: false
+  IndentBraces: false
+  SplitEmptyFunction: false
+  SplitEmptyRecord: false
+  SplitEmptyNamespace: false
+
+AllowShortFunctionsOnASingleLine: All  # Allow functions on a single line if body is empty
+AllowShortBlocksOnASingleLine: Empty
+SpaceBeforeParens: ControlStatements  # Add space before parentheses in control statements (e.g., `if`, `for`)
+SpaceInEmptyBlock: false
+
+AccessModifierOffset: -4  # Align `private/public` access modifiers with class members
+IndentAccessModifiers: false  # Disable extra indentation for access specifiers
+
+ConstructorInitializerIndentWidth: 4  # Indent constructor initializer lists
+ConstructorInitializerAllOnOneLineOrOnePerLine: false  # Keep initializers together on a single line if they fit
+AlignAfterOpenBracket: Align  # Disable aligning parameters across multiple lines
+AlignArrayOfStructures: Left
+
+ColumnLimit: 100  # Optional, set column limit to avoid overly long lines
+SpacesInParentheses: false  # No spaces inside parentheses
+
+SortIncludes: true  # Optional, to maintain the original order of includes if needed
+
+BreakBeforeBinaryOperators: None
+
+Cpp11BracedListStyle: true
+
+PackConstructorInitializers: CurrentLine
+BreakConstructorInitializers: AfterColon
+
+ReferenceAlignment: Right
+
+IndentCaseLabels: true
+
+AlignTrailingComments:
+  Kind: Always
+  OverEmptyLines: 0
