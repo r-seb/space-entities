@@ -1,10 +1,12 @@
 #include "TM4C123GH6PM.h"
+#include "assets.h"
 #include "delay.h"
 #include "led.h"
-#include "assets.h"
 #include "ssd1309_128x64_i2c.h"
 #include "u8g2.h"
+#include <stdbool.h>
 #include <stdint.h>
+
 
 _Noreturn void assert_failed(char const* const module, int const id)
 {
@@ -27,13 +29,23 @@ int main()
     delay_init();
     ssd1309_128x64_init(&oled);
 
-    u8g2_DrawXBM(&oled, 56, 24, 16, 16, boss_ship_bmp);
-    u8g2_DrawXBM(&oled, 56, 45, 8, 8, player_ship_bmp);
-    u8g2_SendBuffer(&oled);
-
+    uint8_t y = 0;
+    bool limit_hit = false;
     while (1) {
-        led_toggle(LED_BLUE);
-        delay_ms(1000);
+        if (limit_hit) {
+            y--;
+            if (y == 0) {
+                limit_hit = false;
+            }
+        } else if (y >= 0 && y <= 56) {
+            y++;
+            if (y == 56) {
+                limit_hit = true;
+            }
+        }
+        u8g2_ClearBuffer(&oled);
+        u8g2_DrawXBM(&oled, 60, y, 8, 8, player_ship_bmp);
+        u8g2_SendBuffer(&oled);
     }
 
     return 0;

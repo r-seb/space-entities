@@ -5,7 +5,7 @@
 
 // https://github.com/olikraus/u8g2/wiki/Porting-to-new-MCU-platform
 
-void ssd1309_128x64_init(u8g2_t *oled)
+void ssd1309_128x64_init(u8g2_t* oled)
 {
     u8g2_Setup_ssd1309_i2c_128x64_noname2_f(oled, U8G2_R0, u8x8_i2c, u8x8_gpio_and_delay_i2c);
     u8g2_InitDisplay(oled);
@@ -73,7 +73,7 @@ void i2c1_init()
      * Control module (see page 340). To find out which GPIO port to enable, refer to Table
      * 23-5 on page 1351.
      */
-    SYSCTL->RCGCGPIO |= (1U << 0); // GPIOA
+    SYSCTL->RCGCGPIO |= (1U << 0);  // GPIOA
     SYSCTL->GPIOHBCTL |= (1U << 0); // Enable High-Performance Bus Control
 
     /*
@@ -107,7 +107,7 @@ void i2c1_init()
      * TPR = (20MHz/(2*(6+4)*100000))-1;
      * TPR = 9
      */
-    I2C1->MTPR = (((SystemCoreClock / (2 * (6 + 4) * 100000)) - 1) << 0);
+    I2C1->MTPR = (((SystemCoreClock / (2 * (6 + 4) * 1000000)) - 1) << 0);
 }
 
 void i2c1_write(uint8_t slave_addr, uint8_t* buffer, uint8_t buf_idx)
