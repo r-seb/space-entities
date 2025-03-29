@@ -50,16 +50,22 @@
                                 <option id="com.ti.ccstudio.buildDefinitions.TMS470_GNU_9.0.compilerID.STRICT_DWARF.784475742" superClass="com.ti.ccstudio.buildDefinitions.TMS470_GNU_9.0.compilerID.STRICT_DWARF" value="true" valueType="boolean"/>
                                 <option id="com.ti.ccstudio.buildDefinitions.TMS470_GNU_9.0.compilerID.DWARF_VERSION.1028457883" superClass="com.ti.ccstudio.buildDefinitions.TMS470_GNU_9.0.compilerID.DWARF_VERSION" value="com.ti.ccstudio.buildDefinitions.TMS470_GNU_9.0.compilerID.DWARF_VERSION.3" valueType="enumerated"/>
                                 <option id="com.ti.ccstudio.buildDefinitions.TMS470_GNU_9.0.compilerID.INCLUDE_PATH.355322402" superClass="com.ti.ccstudio.buildDefinitions.TMS470_GNU_9.0.compilerID.INCLUDE_PATH" valueType="includePath">
-                                    <listOptionValue value="${PROJECT_ROOT}"/>
+                                    <listOptionValue value="${PROJECT_ROOT}/src"/>
                                     <listOptionValue value="${PROJECT_ROOT}/config"/>
                                     <listOptionValue value="${PROJECT_ROOT}/external/CMSIS/Include"/>
                                     <listOptionValue value="${CG_TOOL_INCLUDE_PATH}"/>
+                                    <listOptionValue value="${PROJECT_ROOT}/external/u8g2/csrc"/>
+                                    <listOptionValue value="${PROJECT_ROOT}/src/app"/>
+                                    <listOptionValue value="${PROJECT_ROOT}/src/drivers"/>
                                 </option>
                                 <option id="com.ti.ccstudio.buildDefinitions.TMS470_GNU_9.0.compilerID.ASM_SPECIFIC_FLAGS.1270716365" superClass="com.ti.ccstudio.buildDefinitions.TMS470_GNU_9.0.compilerID.ASM_SPECIFIC_FLAGS" valueType="stringList">
                                     <listOptionValue value="[asm: -xassembler-with-cpp]"/>
                                 </option>
                                 <option id="com.ti.ccstudio.buildDefinitions.TMS470_GNU_9.0.compilerID.OPT_LEVEL.222043015" superClass="com.ti.ccstudio.buildDefinitions.TMS470_GNU_9.0.compilerID.OPT_LEVEL" value="com.ti.ccstudio.buildDefinitions.TMS470_GNU_9.0.compilerID.OPT_LEVEL.OPT_FOR_DEBUG" valueType="enumerated"/>
                                 <option id="com.ti.ccstudio.buildDefinitions.TMS470_GNU_9.0.compilerID.SPECS.1650366219" superClass="com.ti.ccstudio.buildDefinitions.TMS470_GNU_9.0.compilerID.SPECS" value="&quot;nosys.specs&quot;" valueType="string"/>
+                                <option id="com.ti.ccstudio.buildDefinitions.TMS470_GNU_9.0.compilerID.OTHER_FLAGS.1627744986" superClass="com.ti.ccstudio.buildDefinitions.TMS470_GNU_9.0.compilerID.OTHER_FLAGS" valueType="stringList">
+                                    <listOptionValue value="-Wl,--gc-sections"/>
+                                </option>
                                 <inputType id="com.ti.ccstudio.buildDefinitions.TMS470_GNU_9.0.compiler.inputType__C_SRCS.1995583462" name="C Sources" superClass="com.ti.ccstudio.buildDefinitions.TMS470_GNU_9.0.compiler.inputType__C_SRCS"/>
                                 <inputType id="com.ti.ccstudio.buildDefinitions.TMS470_GNU_9.0.compiler.inputType__CPP_SRCS.1223358134" name="C++ Sources" superClass="com.ti.ccstudio.buildDefinitions.TMS470_GNU_9.0.compiler.inputType__CPP_SRCS"/>
                                 <inputType id="com.ti.ccstudio.buildDefinitions.TMS470_GNU_9.0.compiler.inputType__ASM_SRCS.1977460381" name="Assembly Sources" superClass="com.ti.ccstudio.buildDefinitions.TMS470_GNU_9.0.compiler.inputType__ASM_SRCS"/>

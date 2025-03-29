@@ -1,12 +1,10 @@
-#include "TM4C123GH6PM.h" /* the TM4C MCU Peripheral Access Layer (TI) */
+#include "TM4C123GH6PM.h"
+#include "delay.h"
+#include "led.h"
+#include "assets.h"
+#include "ssd1309_128x64_i2c.h"
+#include "u8g2.h"
 #include <stdint.h>
-
-#define SYS_CLOCK_HZ 16000000U
-
-/* on-board LEDs */
-#define LED_RED (1U << 1)
-#define LED_BLUE (1U << 2)
-#define LED_GREEN (1U << 3)
 
 _Noreturn void assert_failed(char const* const module, int const id)
 {
@@ -21,24 +19,22 @@ _Noreturn void assert_failed(char const* const module, int const id)
     NVIC_SystemReset();
 }
 
-int main(void)
+u8g2_t oled;
+
+int main()
 {
-    SYSCTL->RCGCGPIO |= (1U << 5);  /* enable Run mode for GPIOF */
-    SYSCTL->GPIOHBCTL |= (1U << 5); /* enable AHB for GPIOF */
-    GPIOF_AHB->DIR |= (LED_RED | LED_BLUE | LED_GREEN);
-    GPIOF_AHB->DEN |= (LED_RED | LED_BLUE | LED_GREEN);
+    led_init();
+    delay_init();
+    ssd1309_128x64_init(&oled);
+
+    u8g2_DrawXBM(&oled, 56, 24, 16, 16, boss_ship_bmp);
+    u8g2_DrawXBM(&oled, 56, 45, 8, 8, player_ship_bmp);
+    u8g2_SendBuffer(&oled);
 
     while (1) {
-        int32_t count = 0;
-        GPIOF_AHB->DATA_Bits[LED_GREEN] = LED_GREEN; // LED ON
-        while (count < 1000000) {
-            count++;
-        }
-
-        count = 0;
-        GPIOF_AHB->DATA_Bits[LED_GREEN] = ~LED_GREEN; // LED OFF
-        while (count < 1000000) {
-            count++;
-        }
+        led_toggle(LED_BLUE);
+        delay_ms(1000);
     }
+
+    return 0;
 }
