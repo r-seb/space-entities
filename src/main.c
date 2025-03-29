@@ -7,7 +7,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-
 _Noreturn void assert_failed(char const* const module, int const id)
 {
     (void)module; // unused parameter
@@ -44,7 +43,7 @@ int main()
             }
         }
         u8g2_ClearBuffer(&oled);
-        u8g2_DrawXBM(&oled, 60, y, 8, 8, player_ship_bmp);
+        u8g2_DrawXBM(&oled, 60, y, 8, 8, player_ship1_bmp);
         u8g2_SendBuffer(&oled);
     }
 
