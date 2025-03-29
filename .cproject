@@ -52,6 +52,7 @@
                                 <option id="com.ti.ccstudio.buildDefinitions.TMS470_GNU_9.0.compilerID.INCLUDE_PATH.355322402" superClass="com.ti.ccstudio.buildDefinitions.TMS470_GNU_9.0.compilerID.INCLUDE_PATH" valueType="includePath">
                                     <listOptionValue value="${PROJECT_ROOT}/src"/>
                                     <listOptionValue value="${PROJECT_ROOT}/config"/>
+                                    <listOptionValue value="${PROJECT_ROOT}/external/printf/src/printf"/>
                                     <listOptionValue value="${PROJECT_ROOT}/external/CMSIS/Include"/>
                                     <listOptionValue value="${CG_TOOL_INCLUDE_PATH}"/>
                                     <listOptionValue value="${PROJECT_ROOT}/external/u8g2/csrc"/>
@@ -82,6 +83,9 @@
                             <tool id="com.ti.ccstudio.buildDefinitions.TMS470_GNU_9.0.hex.714010232" name="GNU Objcopy Utility" superClass="com.ti.ccstudio.buildDefinitions.TMS470_GNU_9.0.hex"/>
                         </toolChain>
                     </folderInfo>
+                    <sourceEntries>
+                        <entry excluding="external/u8g2/sys|external/u8g2/CMakeLists.txt|external/printf/CMakeLists.txt" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+                    </sourceEntries>
                 </configuration>
             </storageModule>
             <storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>

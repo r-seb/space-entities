@@ -1,0 +1,14 @@
+Submodule external/printf contains modified content
+diff --git a/external/printf/src/printf/printf.c b/external/printf/src/printf/printf.c
+index e47bac6..2bc43a8 100644
+--- a/external/printf/src/printf/printf.c
++++ b/external/printf/src/printf/printf.c
+@@ -43,7 +43,7 @@
+ #include "printf_config.h"
+ #endif
+ 
+-#include <printf/printf.h>
++#include "printf.h"
+ 
+ #ifdef __cplusplus
+ #include <cstdint>

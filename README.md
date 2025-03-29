@@ -15,3 +15,12 @@
 
 - creator: <https://www.pixilart.com/draw?ref=home-page>
 - png to bytes array: <https://projedefteri.com/en/tools/lcd-assistant>
+
+## Build
+
+After cloning repo, make sure to initialize the submodules and apply the patch.
+
+```sh
+git submodule update --init --recursive
+git apply external/printf.patch
+```
