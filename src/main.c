@@ -1,6 +1,7 @@
 #include "TM4C123GH6PM.h"
 #include "assets.h"
 #include "delay.h"
+#include "i2c.h"
 #include "led.h"
 #include "printf.h"
 #include "ssd1309_128x64_i2c.h"
@@ -8,7 +9,6 @@
 #include "uart.h"
 #include <stdbool.h>
 #include <stdint.h>
-
 
 _Noreturn void assert_failed(char const* const module, int const id)
 {
@@ -29,9 +29,10 @@ int main()
 {
     led_init();
     delay_init();
+    i2c1_init();
     uart_init();
-    ssd1309_128x64_init(&oled);
-    printf_("Hello from UART0!!\n\r");
+    ssd1309_128x64_init(&oled, &i2c1_write);
+    printf_("Hello from Tiva!!\n\r");
 
     uint8_t y = 0;
     bool limit_hit_y = false;
