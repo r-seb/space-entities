@@ -29,22 +29,33 @@ int main()
     ssd1309_128x64_init(&oled);
 
     uint8_t y = 0;
-    bool limit_hit = false;
+    bool limit_hit_y = false;
+    uint8_t x = 0;
+    bool limit_hit_x = false;
     while (1) {
-        if (limit_hit) {
-            y--;
-            if (y == 0) {
-                limit_hit = false;
+        // Clear buffer and draw the player ship
+        u8g2_ClearBuffer(&oled);
+        u8g2_DrawXBM(&oled, x, y, 8, 8, player_ship1_bmp);
+        u8g2_SendBuffer(&oled);
+
+        if (limit_hit_y) {
+            if (--y == 0) {
+                limit_hit_y = false;
             }
-        } else if (y >= 0 && y <= 56) {
-            y++;
-            if (y == 56) {
-                limit_hit = true;
+        } else {
+            if (++y == 56) {
+                limit_hit_y = true;
             }
         }
-        u8g2_ClearBuffer(&oled);
-        u8g2_DrawXBM(&oled, 60, y, 8, 8, player_ship1_bmp);
-        u8g2_SendBuffer(&oled);
+        if (limit_hit_x) {
+            if (--x == 0) {
+                limit_hit_x = false;
+            }
+        } else {
+            if (++x == 118) {
+                limit_hit_x = true;
+            }
+        }
     }
 
     return 0;
