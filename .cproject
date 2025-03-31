@@ -45,6 +45,7 @@
                                 <option id="com.ti.ccstudio.buildDefinitions.TMS470_GNU_9.0.compilerID.DATA_SECTIONS.227832481" superClass="com.ti.ccstudio.buildDefinitions.TMS470_GNU_9.0.compilerID.DATA_SECTIONS" value="true" valueType="boolean"/>
                                 <option id="com.ti.ccstudio.buildDefinitions.TMS470_GNU_9.0.compilerID.DEFINE.1374882787" superClass="com.ti.ccstudio.buildDefinitions.TMS470_GNU_9.0.compilerID.DEFINE" valueType="definedSymbols">
                                     <listOptionValue value="PART_TM4C123GH6PM"/>
+                                    <listOptionValue value="PRINTF_INCLUDE_CONFIG_H=1"/>
                                 </option>
                                 <option id="com.ti.ccstudio.buildDefinitions.TMS470_GNU_9.0.compilerID.DEBUG.529594438" superClass="com.ti.ccstudio.buildDefinitions.TMS470_GNU_9.0.compilerID.DEBUG" value="true" valueType="boolean"/>
                                 <option id="com.ti.ccstudio.buildDefinitions.TMS470_GNU_9.0.compilerID.STRICT_DWARF.784475742" superClass="com.ti.ccstudio.buildDefinitions.TMS470_GNU_9.0.compilerID.STRICT_DWARF" value="true" valueType="boolean"/>
