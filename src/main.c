@@ -3,6 +3,7 @@
 #include "delay.h"
 #include "i2c.h"
 #include "led.h"
+#include "mpu6050_i2c.h"
 #include "printf.h"
 #include "ssd1309_128x64_i2c.h"
 #include "u8g2.h"
@@ -29,9 +30,10 @@ int main()
 {
     led_init();
     delay_init();
-    i2c1_init();
+    i2c1_init(I2C_1Mbps);
     uart_init();
     ssd1309_128x64_init(&oled, &i2c1_write);
+    mpu6050_init(&i2c1_write, &i2c1_read);
     printf_("Hello from Tiva!!\n\r");
 
     uint8_t y = 0;
