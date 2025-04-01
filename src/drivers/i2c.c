@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 _Noreturn extern void assert_failed(char const* const module, int const id);
+
 void i2c1_init(uint32_t i2c_speed)
 {
     // Refer Table 16-1. I2C Signals (64LQFP), [pg. 998]
@@ -128,48 +129,48 @@ i2c_status_e i2c1_write(uint8_t slave_addr, uint8_t* buffer, uint8_t buf_size)
     return (stat) ? stat : I2C_STATUS_OK;
 }
 
-i2c_status_e i2c1_read(uint8_t slave_addr, uint8_t* store, uint8_t store_size)
+i2c_status_e i2c1_read(uint8_t slave_addr, uint8_t reg_addr, uint8_t* store, uint8_t store_size)
 {
     // TODO: Add assertions
 
-    // NOTE: Assumes value at index 0 is the memory address to read from
-    i2c1_write(slave_addr, store, 1);
+    i2c1_write(slave_addr, &reg_addr, 1);
 
     // Transition to receive operation
     I2C1->MSA = (slave_addr << 1) | (1U << 0);
 
     i2c_status_e stat;
     // refer pg. 1009, Figure 16-9. Master Single RECEIVE
-    if (store_size == 2) {
+    if (store_size == 1) {
         I2C1->MCS = (1U << 2) | (1U << 1) | (1U << 0); // STOP, START, RUN
         stat = i2c1_wait_tx_rx("Read");
-        *++store = (stat) ? 0x00 : I2C1->MDR;
+        *store = (stat) ? 0x00 : I2C1->MDR;
         // while ((I2C1->MCS & (1U << 6))) {}
     }
     // refer pg. 1011, Figure 16-11. Master RECEIVE of Multiple Data Bytes
-    else if (store_size > 2) {
+    else if (store_size > 1) {
         // Read first data
         I2C1->MCS = (1U << 3) | (1U << 1) | (1U << 0); // ACK, START, RUN
         stat = i2c1_wait_tx_rx("Read");
         if (stat) {
             return stat;
         }
-        *++store = I2C1->MDR;
+        *store++ = I2C1->MDR;
 
         // Read other data
-        while ((store_size - 1) > 2) {
+        while ((store_size - 0) > 1) {
             I2C1->MCS = (1U << 3) | (1U << 0); // ACK, RUN
             stat = i2c1_wait_tx_rx("Read");
             if (stat) {
                 return stat;
             }
-            *++store = I2C1->MDR;
+            *store++ = I2C1->MDR;
+            store_size--;
         }
 
         // Read last data
         I2C1->MCS = (1U << 2) | (1U << 0); // STOP, RUN
         stat = i2c1_wait_tx_rx("Read");
-        *++store = I2C1->MDR;
+        *store = I2C1->MDR;
         // while ((I2C1->MCS & (1U << 6))) {}
     }
     // Size should not be less than 2

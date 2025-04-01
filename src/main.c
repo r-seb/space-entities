@@ -60,7 +60,7 @@ int main()
             } else {
                 y = 0;
             }
-        } else if (imu_raw.accx < 10300) {
+        } else if (imu_raw.accx < 10100) {
             if (y < 56) {
                 y++;
             } else {
