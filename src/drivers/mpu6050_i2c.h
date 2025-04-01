@@ -89,4 +89,18 @@
 #define FIFO_R_W 0x74
 #define WHO_AM_I 0x75
 
+typedef struct {
+    int16_t accx;
+    int16_t accy;
+    int16_t accz;
+
+    int16_t temp;
+
+    int16_t gyrox;
+    int16_t gyroy;
+    int16_t gyroz;
+} mpu6050_data;
+
 void mpu6050_init(i2c_write_handler write_handler, i2c_read_handler read_handler);
+uint8_t mpu6050_is_data_ready(void);
+void mpu6050_read_data(mpu6050_data* store);
