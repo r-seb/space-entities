@@ -2,6 +2,7 @@
 #include "TM4C123GH6PM.h"
 #include "i2c.h"
 #include "printf.h"
+#include <stdbool.h>
 #include <stdint.h>
 
 static i2c_write_handler i2c_write;
@@ -43,11 +44,11 @@ void mpu6050_init(i2c_write_handler write_handler, i2c_read_handler read_handler
     (*i2c_write)(0x68, accel_config, 2);
 }
 
-uint8_t mpu6050_is_data_ready(void)
+bool mpu6050_is_data_ready(void)
 {
     // Interrupt Status, pg. 28
     // Reading this clear the interrupt bits when INT_RD_CLEAR bit in INT_PIN_CFG is 0
-    uint8_t int_status= 0x00;
+    uint8_t int_status = 0x00;
     (*i2c_read)(0x68, INT_STATUS, &int_status, 1);
     return int_status & 0x01;
 }
@@ -55,7 +56,7 @@ uint8_t mpu6050_is_data_ready(void)
 void mpu6050_read_data(mpu6050_data* store)
 {
     uint8_t data[sizeof(*store)] = {0};
-    if((*i2c_read)(0x68, ACCEL_XOUT_H, &data[0], 14) & I2C_STATUS_ERROR){
+    if ((*i2c_read)(0x68, ACCEL_XOUT_H, &data[0], 14) & I2C_STATUS_ERROR) {
         return;
     }
 

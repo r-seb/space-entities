@@ -85,7 +85,7 @@ i2c_status_e i2c1_write(uint8_t slave_addr, uint8_t* buffer, uint8_t buf_size)
      */
     I2C1->MDR = *buffer++;
 
-    i2c_status_e stat;
+    i2c_status_e stat = I2C_STATUS_ERROR;
     // refer pg 1008, Figure 16-8. Master Single TRANSMIT
     if (buf_size == 1) {
         /*
@@ -102,7 +102,7 @@ i2c_status_e i2c1_write(uint8_t slave_addr, uint8_t* buffer, uint8_t buf_size)
         stat = i2c1_wait_tx_rx("Write");
     }
     // refer pg 1010, Figure 16-10. Master TRANSMIT of Multiple Data Bytes
-    else {
+    else if (buf_size > 1) {
         // Send first data
         I2C1->MCS = (1U << 1) | (1U << 0); // START, RUN
         stat = i2c1_wait_tx_rx("Write");
@@ -138,7 +138,7 @@ i2c_status_e i2c1_read(uint8_t slave_addr, uint8_t reg_addr, uint8_t* store, uin
     // Transition to receive operation
     I2C1->MSA = (slave_addr << 1) | (1U << 0);
 
-    i2c_status_e stat;
+    i2c_status_e stat = I2C_STATUS_ERROR;
     // refer pg. 1009, Figure 16-9. Master Single RECEIVE
     if (store_size == 1) {
         I2C1->MCS = (1U << 2) | (1U << 1) | (1U << 0); // STOP, START, RUN
@@ -172,10 +172,6 @@ i2c_status_e i2c1_read(uint8_t slave_addr, uint8_t reg_addr, uint8_t* store, uin
         stat = i2c1_wait_tx_rx("Read");
         *store = I2C1->MDR;
         // while ((I2C1->MCS & (1U << 6))) {}
-    }
-    // Size should not be less than 2
-    else {
-        assert_failed(__FILE__, __LINE__);
     }
     return (stat) ? stat : I2C_STATUS_OK;
 }

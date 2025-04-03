@@ -23,7 +23,8 @@ typedef enum i2c_status_e {
 } i2c_status_e;
 
 typedef i2c_status_e (*i2c_write_handler)(uint8_t slave_addr, uint8_t* buffer, uint8_t buf_size);
-typedef i2c_status_e (*i2c_read_handler)(uint8_t slave_addr, uint8_t reg_addr, uint8_t* store, uint8_t store_size);
+typedef i2c_status_e (*i2c_read_handler)(uint8_t slave_addr, uint8_t reg_addr, uint8_t* store,
+                                         uint8_t store_size);
 
 void i2c1_init(uint32_t i2c_speed);
 i2c_status_e i2c1_write(uint8_t slave_addr, uint8_t* buffer, uint8_t buf_size);
