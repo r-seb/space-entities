@@ -27,21 +27,21 @@ void mpu6050_init(i2c_write_handler write_handler, i2c_read_handler read_handler
     uint8_t smplrt_div[2] = {SMPLRT_DIV, 0x09};
     (*i2c_write)(0x68, smplrt_div, 2);
 
+    // Set gyro config, pg. 14, +/- 250 deg/sec
+    uint8_t gyro_config[2] = {GYRO_CONFIG, 0x00};
+    (*i2c_write)(0x68, gyro_config, 2);
+
+    // Set accel config, pg. 15, +/- 2 g
+    uint8_t accel_config[2] = {ACCEL_CONFIG, 0x00};
+    (*i2c_write)(0x68, accel_config, 2);
+
     // Config with DLPG, pg. 13
-    uint8_t config[2] = {CONFIG, 0x02};
+    uint8_t config[2] = {CONFIG, 0x00};
     (*i2c_write)(0x68, config, 2);
 
     // Set pwr_mgmt to wake the board, pg. 40
-    uint8_t pwr_mgmt_1[2] = {PWR_MGMT_1, 0x04};
+    uint8_t pwr_mgmt_1[2] = {PWR_MGMT_1, 0x01};
     (*i2c_write)(0x68, pwr_mgmt_1, 2);
-
-    // Set gyro config, pg. 14, perform self test
-    uint8_t gyro_config[2] = {GYRO_CONFIG, 0xE0};
-    (*i2c_write)(0x68, gyro_config, 2);
-
-    // Set accel config, pg. 15, perform self test
-    uint8_t accel_config[2] = {ACCEL_CONFIG, 0xE0};
-    (*i2c_write)(0x68, accel_config, 2);
 }
 
 bool mpu6050_is_data_ready(void)
@@ -60,16 +60,25 @@ void mpu6050_read_data(mpu6050_data* store)
         return;
     }
 
-    // parse raw data
-    store->accx = (data[0] << 8) | data[1];
-    store->accy = (data[2] << 8) | data[3];
-    store->accz = (data[4] << 8) | data[5];
-    store->temp = (data[6] << 8) | data[7];
-    store->gyrox = (data[8] << 8) | data[9];
-    store->gyroy = (data[10] << 8) | data[11];
-    store->gyroz = (data[12] << 8) | data[13];
+    // get raw data
+    int16_t accx_raw = (data[0] << 8) | data[1];
+    int16_t accy_raw = (data[2] << 8) | data[3];
+    int16_t accz_raw = (data[4] << 8) | data[5];
+    int16_t temperature_raw = (data[6] << 8) | data[7];
+    int16_t gyrox_raw = (data[8] << 8) | data[9];
+    int16_t gyroy_raw = (data[10] << 8) | data[11];
+    int16_t gyroz_raw = (data[12] << 8) | data[13];
 
-    printf_("AccelX: %d, AccelY: %d, AccelZ: %d \n\r", store->accx, store->accy, store->accz);
-    printf_("Temp: %d\n\r", store->temp);
-    printf_("GyroX: %d, GyroY: %d \n\r", store->gyrox, store->gyroy);
+    // parse raw data
+    store->accx = (float)accx_raw / 16384;
+    store->accy = (float)accy_raw / 16384;
+    store->accz = (float)accz_raw / 16384;
+    store->temperature = (temperature_raw / 340.0) + 36.43;
+    store->gyrox = (float)gyrox_raw / 131;
+    store->gyroy = (float)gyroy_raw / 131;
+    store->gyroz = (float)gyroz_raw / 131;
+
+    // printf_("AccelX: %f, AccelY: %f, AccelZ: %f \n\r", store->accx, store->accy, store->accz);
+    // printf_("Temp: %f\n\r", store->temperature);
+    // printf_("GyroX: %f, GyroY: %f, GyroZ: %f \n\r", store->gyrox, store->gyroy, store->gyroz);
 }

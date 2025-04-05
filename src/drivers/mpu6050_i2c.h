@@ -91,15 +91,13 @@
 #define WHO_AM_I 0x75
 
 typedef struct {
-    int16_t accx;
-    int16_t accy;
-    int16_t accz;
-
-    int16_t temp;
-
-    int16_t gyrox;
-    int16_t gyroy;
-    int16_t gyroz;
+    float accx;
+    float accy;
+    float accz;
+    float temperature;
+    float gyrox;
+    float gyroy;
+    float gyroz;
 } mpu6050_data;
 
 void mpu6050_init(i2c_write_handler write_handler, i2c_read_handler read_handler);

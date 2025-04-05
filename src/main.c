@@ -40,19 +40,18 @@ int main()
     printf_("Hello from Tiva!!\n\r");
 
     /* Enter the ThreadX kernel. */
-    tx_kernel_enter();
+    // tx_kernel_enter();
     // The function below should never execute
 
+    // Ship should spawn in the middle of screen
     uint8_t x = 128 / 2 - 8;
     uint8_t y = 64 / 2 - 8;
-    // accx: 27500, 10500, 5400
-    // accy: 25300, 9100, -7400
-    // accz: 30000
-    mpu6050_data imu_raw;
+    mpu6050_data imu;
+    float move_thres = 0.02f; // acc approx value between -1g to 1g
     while (1) {
         // Check for imu readings
         if (mpu6050_is_data_ready()) {
-            mpu6050_read_data(&imu_raw);
+            mpu6050_read_data(&imu);
         }
 
         // Clear buffer and draw the player ship
@@ -61,13 +60,13 @@ int main()
         u8g2_SendBuffer(&oled);
 
         // UP-DOWN Movement
-        if (imu_raw.accx > 10700) {
+        if (imu.accx > move_thres) {
             if (y > 0) {
                 y--;
             } else {
                 y = 0;
             }
-        } else if (imu_raw.accx < 10100) {
+        } else if (imu.accx < -move_thres) {
             if (y < 56) {
                 y++;
             } else {
@@ -75,13 +74,13 @@ int main()
             }
         }
         // LEFT-RIGHT Movement
-        if (imu_raw.accy > 9300) {
+        if (imu.accy > move_thres) {
             if (x > 0) {
                 x--;
             } else {
                 x = 0;
             }
-        } else if (imu_raw.accy < 9000) {
+        } else if (imu.accy < -move_thres) {
             if (x < 118) {
                 x++;
             } else {
