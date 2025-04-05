@@ -6,10 +6,13 @@
 #include "mpu6050_i2c.h"
 #include "printf.h"
 #include "ssd1309_128x64_i2c.h"
+#include "tx_api.h"
 #include "u8g2.h"
 #include "uart.h"
 #include <stdbool.h>
 #include <stdint.h>
+
+TX_THREAD blinky_thread;
 
 _Noreturn void assert_failed(char const* const module, int const id)
 {
@@ -35,6 +38,10 @@ int main()
     ssd1309_128x64_init(&oled, &i2c1_write);
     mpu6050_init(&i2c1_write, &i2c1_read);
     printf_("Hello from Tiva!!\n\r");
+
+    /* Enter the ThreadX kernel. */
+    tx_kernel_enter();
+    // The function below should never execute
 
     uint8_t x = 128 / 2 - 8;
     uint8_t y = 64 / 2 - 8;
@@ -84,4 +91,22 @@ int main()
     }
 
     return 0;
+}
+
+void blinky_thread_entry(ULONG thread_input)
+{
+    /* Enter into a forever loop. */
+    while (1) {
+        /* Blink LED */
+        led_toggle(LED_BLUE);
+        /* Sleep for 1000 tick. */
+        tx_thread_sleep(1000);
+    }
+}
+
+void tx_application_define(void* first_unused_memory)
+{
+    /* Create blinky_thread! */
+    tx_thread_create(&blinky_thread, "Blinky Thread", blinky_thread_entry, 0x1234,
+                     first_unused_memory, 1024, 3, 3, TX_NO_TIME_SLICE, TX_AUTO_START);
 }

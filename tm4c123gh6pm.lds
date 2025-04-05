@@ -23,7 +23,7 @@ MEMORY { /* memory map of Tiva TM4C123GH6PM */
 STACK_SIZE = 2048;
 
 /* The size of the heap used by the application. NOTE: you need to adjust   */
-HEAP_SIZE = 0;
+HEAP_SIZE = 128;
 
 SECTIONS {
 
@@ -108,6 +108,8 @@ SECTIONS {
         . = ALIGN(4);
         __heap_end__ = .;
     } >RAM
+    
+    __RAM_segment_used_end__ = .;
 
     /* Remove information from the standard libraries */
     /DISCARD/ : {

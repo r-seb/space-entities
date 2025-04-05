@@ -56,6 +56,8 @@
                                     <listOptionValue value="${PROJECT_ROOT}/external/printf/src/printf"/>
                                     <listOptionValue value="${PROJECT_ROOT}/external/CMSIS/Include"/>
                                     <listOptionValue value="${CG_TOOL_INCLUDE_PATH}"/>
+                                    <listOptionValue value="${PROJECT_ROOT}/external/threadx/ports/cortex_m4/gnu/inc"/>
+                                    <listOptionValue value="${PROJECT_ROOT}/external/threadx/common/inc"/>
                                     <listOptionValue value="${PROJECT_ROOT}/external/u8g2/csrc"/>
                                     <listOptionValue value="${PROJECT_ROOT}/src/app"/>
                                     <listOptionValue value="${PROJECT_ROOT}/src/drivers"/>
@@ -85,7 +87,7 @@
                         </toolChain>
                     </folderInfo>
                     <sourceEntries>
-                        <entry excluding="external/u8g2/sys|external/u8g2/CMakeLists.txt|external/printf/CMakeLists.txt" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+                        <entry excluding="external/threadx/ports/cortex_m4/gnu/example_build|external/u8g2/sys|external/u8g2/CMakeLists.txt|external/printf/CMakeLists.txt" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
                     </sourceEntries>
                 </configuration>
             </storageModule>
