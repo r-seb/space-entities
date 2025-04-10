@@ -1,4 +1,5 @@
 #include "TM4C123GH6PM.h"
+#include "assert_handler.h"
 #include "assets.h"
 #include "delay.h"
 #include "i2c.h"
@@ -13,19 +14,6 @@
 #include <stdint.h>
 
 TX_THREAD blinky_thread;
-
-_Noreturn void assert_failed(char const* const module, int const id)
-{
-    (void)module; // unused parameter
-    (void)id;     // unused parameter
-#ifndef NDEBUG
-    // light up all LEDs
-    GPIOF_AHB->DATA_Bits[LED_GREEN | LED_RED | LED_BLUE] = 0xFFU;
-    // for debugging, hang on in an endless loop...
-    for (;;) {}
-#endif
-    NVIC_SystemReset();
-}
 
 u8g2_t oled;
 

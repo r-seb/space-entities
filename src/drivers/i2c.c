@@ -3,8 +3,6 @@
 #include "printf.h"
 #include <stdint.h>
 
-_Noreturn extern void assert_failed(char const* const module, int const id);
-
 void i2c1_init(uint32_t i2c_speed)
 {
     // Refer Table 16-1. I2C Signals (64LQFP), [pg. 998]
