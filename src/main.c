@@ -1,5 +1,6 @@
 #include "TM4C123GH6PM.h"
 #include "active_object.h"
+#include "app.h"
 #include "assert_handler.h"
 #include "assets.h"
 #include "delay.h"
@@ -33,97 +34,6 @@ TX_BYTE_POOL msg_evt_byte_pool;
 
 u8g2_t oled;
 
-enum GameSignals {
-    TIME_TICK_SIG = USER_SIG,
-    MINE_IMG_SIG,
-    SHIP_IMG_SIG,
-
-    PLAYER_SHIP_UP_SIG,
-    PLAYER_SHIP_DOWN_SIG,
-    PLAYER_SHIP_LEFT_SIG,
-    PLAYER_SHIP_RIGHT_SIG,
-
-    MAX_SIG
-};
-
-typedef struct {
-    Event super;
-
-    // public:
-    uint8_t x;
-    uint8_t y;
-} PositionEvent;
-
-typedef struct {
-    Active super;
-
-    // private:
-    uint8_t* mines[5];
-    uint8_t last_mine_x;
-    uint8_t last_mine_y;
-} Passageway;
-
-static void Passageway_dispatch(Passageway* me, Event const* const e)
-{
-    UINT status;
-    switch (e->sig) {
-        case INIT_SIG: {
-            printf_("Passageway Initialized\n\r");
-        } break;
-        case SHIP_IMG_SIG: {
-            printf_("Mine PosX=%u, PosY=%u \n\r", EVENT_CAST(PositionEvent)->x,
-                    EVENT_CAST(PositionEvent)->y);
-            status = EVENT_HANDLED();
-            printf_("Byte Released: %d\n\r", status);
-        } break;
-        default:
-            printf_("Passageway Default State\n\r");
-            break;
-    }
-}
-
-static void Passageway_ctor(Passageway* const me)
-{
-    Active_ctor(&me->super, (ao_dispatch_handler)&Passageway_dispatch);
-}
-
-static Passageway passageway;
-Active* AO_Passageway = &passageway.super; // Global pointer so that others can post events to it
-
-typedef struct {
-    Active super;
-
-    // private:
-} I2CManager;
-
-static void I2CManager_dispatch(I2CManager* me, Event const* const e)
-{
-    switch (e->sig) {
-        case INIT_SIG: {
-            printf_("I2CManager Initialized\n\r");
-            // static Event const mine_img_evt = {MINE_IMG_SIG};
-            // Active_post(AO_Passageway, &mine_img_evt);
-            PositionEvent* pos_evt;
-            EVENT_ALLOCATE(msg_evt_byte_pool, pos_evt);
-            pos_evt->super.sig = SHIP_IMG_SIG;
-            pos_evt->x = 0xD;
-            pos_evt->y = 0xB;
-            Active_post(AO_Passageway, (Event*)pos_evt);
-        } break;
-        default:
-            printf_("I2CManager Default State\n\r");
-            break;
-    }
-}
-
-static void I2CManager_ctor(I2CManager* const me)
-{
-    Active_ctor(&me->super, (ao_dispatch_handler)&I2CManager_dispatch);
-}
-
-static I2CManager i2c_manager;
-Active* AO_I2CManager = &i2c_manager.super; // Global pointer so that others can post events to it
-
 int main()
 {
     SystemCoreClockUpdate();
@@ -152,6 +62,9 @@ int main()
 
         // Clear buffer and draw the player ship
         u8g2_ClearBuffer(&oled);
+        u8g2_SetFont(&oled, u8g2_font_siji_t_6x10);
+        u8g2_DrawGlyph(&oled, x - 10, y, 0xe19d);
+        u8g2_DrawXBM(&oled, x + 10, y, 8, 7, mine_bmp);
         u8g2_DrawXBM(&oled, x, y, 8, 8, player_ship1_bmp);
         u8g2_SendBuffer(&oled);
 
@@ -202,11 +115,11 @@ void tx_application_define(void* first_unused_memory)
     CHAR* queue_ptr;
 
     // Create AO and start them
-    Passageway_ctor(&passageway);
+    Passageway_ctor_call();
     Active_start(AO_Passageway, 0, &thread_block_pool, THREAD_STACK_SIZE, &stack_ptr,
                  &msg_evt_byte_pool, MSG_QUEUE_SIZE, &queue_ptr);
 
-    I2CManager_ctor(&i2c_manager);
+    I2CManager_ctor_call();
     Active_start(AO_I2CManager, 0, &thread_block_pool, THREAD_STACK_SIZE, &stack_ptr,
                  &msg_evt_byte_pool, MSG_QUEUE_SIZE, &queue_ptr);
 }
