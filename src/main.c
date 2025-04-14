@@ -15,6 +15,12 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+static TX_TIMER l_timer_tick;
+static void l_timer_tick_fn(ULONG id)
+{
+    TimeEvent_tick();
+}
+
 /*
  * https://github.com/eclipse-threadx/rtos-docs/blob/main/rtos-docs/threadx/chapter4.md#tx_block_pool_create
  * Total number of blocks = 1440 / (256 + 4) = 5.54 = 5 blocks for 5 AO threads
@@ -103,13 +109,23 @@ int main()
 
 void tx_application_define(void* first_unused_memory)
 {
+    UINT status;
+
+    // Timer responsible for calling all active objects TimeEvent
+    status = tx_timer_create(&l_timer_tick, "timer tick", &l_timer_tick_fn, 0U, 1U, 1U,
+                             TX_AUTO_ACTIVATE);
+    ASSERT(status == TX_SUCCESS);
+
     // For AO threads
-    tx_block_pool_create(&thread_block_pool, "ao block pool", THREAD_STACK_SIZE,
-                         first_unused_memory, THREAD_BLOCK_POOL_SIZE);
+    status = tx_block_pool_create(&thread_block_pool, "ao block pool", THREAD_STACK_SIZE,
+                                  first_unused_memory, THREAD_BLOCK_POOL_SIZE);
+    ASSERT(status == TX_SUCCESS);
+
     // For AO message queues and events
     void* next_unused_memory = (UCHAR*)first_unused_memory + THREAD_BLOCK_POOL_SIZE;
-    tx_byte_pool_create(&msg_evt_byte_pool, "message event byte pool", next_unused_memory,
-                        MSG_EVT_BYTE_POOL_SIZE);
+    status = tx_byte_pool_create(&msg_evt_byte_pool, "message event byte pool", next_unused_memory,
+                                 MSG_EVT_BYTE_POOL_SIZE);
+    ASSERT(status == TX_SUCCESS);
 
     CHAR* stack_ptr;
     CHAR* queue_ptr;

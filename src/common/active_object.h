@@ -7,7 +7,7 @@ extern TX_BYTE_POOL msg_evt_byte_pool;
 
 #define EVENT_CAST(type_) ((type_ const*)(e))
 
-#define EVENT_ALLOCATE(evt_)                                                                \
+#define EVENT_ALLOCATE(evt_)                                                                       \
     (tx_byte_allocate(&msg_evt_byte_pool, (VOID**)&(evt_), sizeof(*(evt_)), TX_NO_WAIT))
 #define EVENT_HANDLED() (tx_byte_release((VOID*)e))
 
@@ -47,3 +47,20 @@ void Active_ctor(Active* const me, ao_dispatch_handler dispatch);
 void Active_start(Active* const me, UINT prio, TX_BLOCK_POOL* block_pool, uint32_t stack_size,
                   CHAR** stack_ptr, TX_BYTE_POOL* byte_pool, uint32_t queue_len, CHAR** queue_ptr);
 void Active_post(Active* const me, Event const* const e);
+void Active_post_nonthread(Active* const me, Event const* const e);
+
+// ---------------------------------------------------------------------------------------------//
+// Timer Event Facilities
+typedef struct {
+    Event super;           // inherit Event
+    Active* active_object; // the AO that requested this TimeEvent
+    uint32_t timeout;      // timeout counter, 0 means not armed
+    uint32_t interval;     // interval for periodic TimeEvent, 0 means one-shot
+} TimeEvent;
+
+void TimeEvent_ctor(TimeEvent* const me, ao_signal sig, Active* act);
+void TimeEvent_arm(TimeEvent* const me, uint32_t timeout, uint32_t interval);
+void TimeEvent_disarm(TimeEvent* const me);
+
+// static (i.e., class-wide) operation
+void TimeEvent_tick(void);

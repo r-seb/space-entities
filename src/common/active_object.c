@@ -4,6 +4,8 @@
 #include "tx_api.h"
 #include <stdint.h>
 
+// ---------------------------------------------------------------------------------------------//
+// Active Object Facilities
 void Active_ctor(Active* const me, ao_dispatch_handler dispatch) { me->dispatch = dispatch; }
 
 // Thread function for all Active Objects
@@ -52,4 +54,72 @@ void Active_post(Active* const me, Event const* const e)
 {
     UINT status = tx_queue_send(&me->queue, (void*)&e, TX_WAIT_FOREVER);
     ASSERT(status == TX_SUCCESS);
+}
+
+void Active_post_nonthread(Active* const me, Event const* const e)
+{
+    // TX_NO_WAIT is the only valid option for non-thread calls
+    // https://github.com/eclipse-threadx/rtos-docs/blob/main/rtos-docs/threadx/chapter4.md#parameters-42
+    UINT status = tx_queue_send(&me->queue, (void*)&e, TX_NO_WAIT);
+    ASSERT(status == TX_SUCCESS);
+}
+
+// ---------------------------------------------------------------------------------------------//
+// Timer Event Facilities
+static TimeEvent* l_time_event_list[10]; // all TimeEvents in the application
+static uint8_t l_time_event_num;         // current number of TimeEvents
+
+/*..........................................................................*/
+void TimeEvent_ctor(TimeEvent* const me, ao_signal sig, Active* act)
+{
+    /* no critical section because it is presumed that all TimeEvents
+     * are created *before* multitasking has started.
+     */
+    me->super.sig = sig;
+    me->active_object = act;
+    me->timeout = 0U;
+    me->interval = 0U;
+
+    /* register one more TimeEvent instance */
+    UINT old_posture;
+    old_posture = tx_interrupt_control(TX_INT_DISABLE);
+    ASSERT(l_time_event_num < sizeof(l_time_event_list) / sizeof(l_time_event_list[0]));
+    l_time_event_list[l_time_event_num] = me;
+    ++l_time_event_num;
+    tx_interrupt_control(old_posture);
+}
+
+/*..........................................................................*/
+void TimeEvent_arm(TimeEvent* const me, uint32_t timeout, uint32_t interval)
+{
+    UINT old_posture;
+    old_posture = tx_interrupt_control(TX_INT_DISABLE);
+    me->timeout = timeout;
+    me->interval = interval;
+    tx_interrupt_control(old_posture);
+}
+
+/*..........................................................................*/
+void TimeEvent_disarm(TimeEvent* const me)
+{
+    UINT old_posture;
+    old_posture = tx_interrupt_control(TX_INT_DISABLE);
+    me->timeout = 0U;
+    tx_interrupt_control(old_posture);
+}
+
+/*..........................................................................*/
+void TimeEvent_tick(void)
+{
+    uint_fast8_t i;
+    for (i = 0U; i < l_time_event_num; ++i) {
+        TimeEvent* const t = l_time_event_list[i];
+        ASSERT(t);                    // TimeEvent instance must be registered
+        if (t->timeout > 0U) {        // is this TimeEvent armed?
+            if (--t->timeout == 0U) { // is it expiring now?
+                Active_post_nonthread(t->active_object, &t->super);
+                t->timeout = t->interval; // rearm or disarm (one-shot)
+            }
+        }
+    }
 }

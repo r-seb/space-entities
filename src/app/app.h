@@ -5,6 +5,7 @@
 
 enum GameSignals {
     TIME_TICK_SIG = USER_SIG,
+    TIME_OUT_SIG,
     MINE_IMG_SIG,
     SHIP_IMG_SIG,
 
