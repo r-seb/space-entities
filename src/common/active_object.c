@@ -6,7 +6,7 @@
 
 // ---------------------------------------------------------------------------------------------//
 // Active Object Facilities
-void Active_ctor(Active* const me, ao_dispatch_handler dispatch) { me->dispatch = dispatch; }
+void Active_ctor(Active* const me, StateHandler initial) { Hsm_ctor(&me->super, initial); }
 
 // Thread function for all Active Objects
 void Active_event_loop(ULONG entry_input)
@@ -18,7 +18,7 @@ void Active_event_loop(ULONG entry_input)
 
     // Initialize the Active Object
     static Event const init_evt = {INIT_SIG};
-    (*me->dispatch)(me, &init_evt);
+    Hsm_init(&me->super, &init_evt);
 
     // Message Pump / Event Loop
     while (1) {
@@ -27,7 +27,7 @@ void Active_event_loop(ULONG entry_input)
         ASSERT(status == TX_SUCCESS);
 
         // dispatch event to the active object "me"
-        (*me->dispatch)(me, e);
+        Hsm_dispatch(&me->super, e);
     }
 }
 
@@ -70,7 +70,7 @@ static TimeEvent* l_time_event_list[10]; // all TimeEvents in the application
 static uint8_t l_time_event_num;         // current number of TimeEvents
 
 /*..........................................................................*/
-void TimeEvent_ctor(TimeEvent* const me, ao_signal sig, Active* act)
+void TimeEvent_ctor(TimeEvent* const me, Signal sig, Active* act)
 {
     /* no critical section because it is presumed that all TimeEvents
      * are created *before* multitasking has started.

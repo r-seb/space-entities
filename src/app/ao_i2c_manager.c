@@ -19,7 +19,7 @@ void I2CManager_ctor_call() { I2CManager_ctor(&i2c_manager); } // To be called b
 
 static void I2CManager_ctor(I2CManager* const me)
 {
-    Active_ctor(&me->super, (ao_dispatch_handler)&I2CManager_dispatch);
+    Active_ctor(&me->super, (StateHandler)&I2CManager_dispatch);
 }
 
 static void I2CManager_dispatch(I2CManager* me, Event const* const e)

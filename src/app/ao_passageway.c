@@ -24,7 +24,7 @@ void Passageway_ctor_call() { Passageway_ctor(&passageway); } // To be called by
 
 static void Passageway_ctor(Passageway* const me)
 {
-    Active_ctor(&me->super, (ao_dispatch_handler)&Passageway_dispatch);
+    Active_ctor(&me->super, (StateHandler)&Passageway_dispatch);
     TimeEvent_ctor(&me->time_event, TIME_OUT_SIG, &me->super);
 }
 
