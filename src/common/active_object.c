@@ -1,6 +1,5 @@
 #include "active_object.h"
 #include "assert_handler.h"
-#include "printf.h"
 #include "tx_api.h"
 #include <stdint.h>
 
@@ -22,7 +21,7 @@ void Active_event_loop(ULONG entry_input)
 
     // Message Pump / Event Loop
     while (1) {
-        Event const* e; // pointer to event object ("message")
+        Event* e; // pointer to event object ("message")
         UINT status = tx_queue_receive(&me->queue, (VOID*)&e, TX_WAIT_FOREVER);
         ASSERT(status == TX_SUCCESS);
 
@@ -53,6 +52,12 @@ void Active_start(Active* const me, UINT prio, TX_BLOCK_POOL* block_pool, uint32
 void Active_post(Active* const me, Event const* const e)
 {
     UINT status = tx_queue_send(&me->queue, (void*)&e, TX_WAIT_FOREVER);
+    ASSERT(status == TX_SUCCESS);
+}
+
+void Active_post_front(Active* const me, Event const* const e)
+{
+    UINT status = tx_queue_front_send(&me->queue, (void*)&e, TX_WAIT_FOREVER);
     ASSERT(status == TX_SUCCESS);
 }
 

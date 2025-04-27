@@ -1,8 +1,12 @@
 #include "uart.h"
 #include "TM4C123GH6PM.h"
+#include "active_object.h"
+#include "app.h"
+#include "assert_handler.h"
+#include "printf.h"
 #include <stdint.h>
 
-void uart_init(void)
+void uart_init(uint32_t baud_rate)
 {
     // 14.4 Initialization and Configuration, pg 902
     // To enable and initialize the UART, the following steps are necessary:
@@ -44,7 +48,7 @@ void uart_init(void)
     // BRD = 20,000,000 / (16 * 115,200) = 10.8507
     // UARTIBRD = 10;
     // UARTFBRD[DIVFRAC] = integer(0.8507 * 64 + 0.5) = 54
-    uint32_t ClkDiv_x_BaudRate = (16 * UART_BAUD_RATE);
+    uint32_t ClkDiv_x_BaudRate = (16 * baud_rate);
 
     /*
      * 1. Disable the UART by clearing the UARTEN bit in the UARTCTL register.
@@ -71,7 +75,10 @@ void uart_init(void)
      * 4. Write the desired serial parameters to the UARTLCRH register (in this case, a value of
      * 0x0000.0060).
      */
-    UART0->LCRH = 0x3U << 5; // 8-bit frame
+    UART0->LCRH = (3U << 5) | (1U << 4); // Enable 8-bit frame, FIFO
+
+    // Configure interrupt, see 14.3.9 Interrupts, pg. 900
+    UART0->IM = (1U << 4) | (1U << 10); // Enable RXIM, OEIM
 
     /*
      * 5. Configure the UART clock source by writing to the UARTCC register.
@@ -82,17 +89,60 @@ void uart_init(void)
      * 6. Optionally, configure the µDMA channel (see “Micro Direct Memory Access (μDMA)” on page
      * 585) and enable the DMA option(s) in the UARTDMACTL register.
      */
-    // Not used
+    // Not used yet
 
     /*
      * 7. Enable the UART by setting the UARTEN bit in the UARTCTL register.
      */
     UART0->CTL = (1U << 0) | (1U << 8) | (1U << 9); // Enable UARTEN, TXE, RXE
+
+    NVIC_SetPriority(UART0_IRQn, 7);
+    NVIC_EnableIRQ(UART0_IRQn);
 }
 
-void putchar_(char c)
+void UART0_IRQHandler()
 {
-    // FIFO Operation, pg. 900
-    while (UART0->FR & (1U << 3)) {} // Check BUSY bit
-    UART0->DR = c;
+    // See pg. 930
+    uint32_t isrs = UART0->MIS;
+    UART0->ICR = 0xFFU; // Clear interrupts
+
+    // OEMIS
+    if (isrs & (1U << 10)) {
+        // TODO: Overrun error check
+    }
+    // RXMIS
+    else if (isrs & (1U << 4)) {
+        // TODO: Receive operation
+    }
 }
+
+int uart_send(const char* format, ...)
+{
+    SerialEvent* serial_evt;
+    EVENT_ALLOCATE(serial_evt);
+    serial_evt->super.sig = UART_SEND_SIG;
+
+    va_list args;
+    va_start(args, format);
+    const int ret = vsnprintf_(serial_evt->buffer, sizeof(serial_evt->buffer), format, args);
+    va_end(args);
+
+    Active_post_nonthread(AO_UARTManager, (Event*)serial_evt);
+    return ret;
+}
+
+void uart_fill_fifo(char** c)
+{
+    ASSERT(c && *c);
+
+    // NOTE: SerialEvents are always null-terminated
+    while (!(UART0->FR & (1U << 5)) && (**c != '\0')) {
+        UART0->DR = **c;
+        (*c)++;
+    }
+    static Event const uart_tx_sig = {UART_TRANSMITTED_SIG};
+    Active_post(AO_UARTManager, &uart_tx_sig);
+}
+
+// To avoid undefined reference since printf.c expects an implementation
+void putchar_(char c) { (void)c; }

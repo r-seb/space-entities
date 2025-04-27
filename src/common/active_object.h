@@ -20,6 +20,7 @@ void Active_ctor(Active* const me, StateHandler initial);
 void Active_start(Active* const me, UINT prio, TX_BLOCK_POOL* block_pool, uint32_t stack_size,
                   CHAR** stack_ptr, TX_BYTE_POOL* byte_pool, uint32_t queue_len, CHAR** queue_ptr);
 void Active_post(Active* const me, Event const* const e);
+void Active_post_front(Active* const me, Event const* const e);
 void Active_post_nonthread(Active* const me, Event const* const e);
 
 // ---------------------------------------------------------------------------------------------//
