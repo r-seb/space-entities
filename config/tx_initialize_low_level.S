@@ -106,10 +106,11 @@ _tx_initialize_low_level:
     STR     r1, [r0]                                @ Setup first unused memory pointer
 @
 @    /* Setup Vector Table Offset Register.  */
+@    /* This is instead set in tm4c123gh6pm_startup_ccs_gcc.c at Line 374. */
 @
-    MOV     r0, #0xE000E000                         @ Build address of NVIC registers
-    LDR     r1, =g_pfnVectors                       @ Pickup address of vector table
-    STR     r1, [r0, #0xD08]                        @ Set vector table address
+    @MOV     r0, #0xE000E000                         @ Build address of NVIC registers
+    @LDR     r1, =g_pfnVectors                       @ Pickup address of vector table
+    @STR     r1, [r0, #0xD08]                        @ Set vector table address
 @
 @    /* Set system stack pointer from vector value.  */
 @
