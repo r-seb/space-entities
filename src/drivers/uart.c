@@ -3,7 +3,7 @@
 #include "active_object.h"
 #include "app.h"
 #include "assert_handler.h"
-#include "printf.h"
+#include "printf/printf.h"
 #include <stdint.h>
 
 void uart_init(uint32_t baud_rate)

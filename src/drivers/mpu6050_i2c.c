@@ -1,7 +1,7 @@
 #include "mpu6050_i2c.h"
 #include "TM4C123GH6PM.h"
 #include "i2c.h"
-#include "printf.h"
+#include "printf/printf.h"
 #include <stdbool.h>
 #include <stdint.h>
 

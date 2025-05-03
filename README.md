@@ -7,7 +7,7 @@
 ### Selected Pins
 
 | OLED | Tiva C |
-|------|--------|
+| ---- | ------ |
 | GND  | GND    |
 | VCC  | 3.3V   |
 | SCL  | PA6    |
@@ -20,17 +20,16 @@
 
 ## Build
 
-After cloning repo, make sure to initialize the submodules and apply the patch
+After cloning repo, make sure to initialize the submodules.
 
 ```sh
 git submodule update --init --recursive
-git apply external/printf.patch
 ```
 
 ## MPU6050
 
 | MPU6050 | Tiva C |
-|---------|--------|
+| ------- | ------ |
 | GND     | GND    |
 | VCC     | 3.3V   |
 | SCL     | PA6    |

@@ -50,7 +50,7 @@
                                 <option id="com.ti.ccstudio.buildDefinitions.TMS470_GNU_10.0.compilerID.INCLUDE_PATH.967639784" superClass="com.ti.ccstudio.buildDefinitions.TMS470_GNU_10.0.compilerID.INCLUDE_PATH" valueType="includePath">
                                     <listOptionValue value="${PROJECT_ROOT}/src"/>
                                     <listOptionValue value="${PROJECT_ROOT}/config"/>
-                                    <listOptionValue value="${PROJECT_ROOT}/external/printf/src/printf"/>
+                                    <listOptionValue value="${PROJECT_ROOT}/external/printf/src"/>
                                     <listOptionValue value="${PROJECT_ROOT}/external/CMSIS/Include"/>
                                     <listOptionValue value="${CG_TOOL_INCLUDE_PATH}"/>
                                     <listOptionValue value="${PROJECT_ROOT}/external/threadx/ports/cortex_m4/gnu/inc"/>
