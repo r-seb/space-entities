@@ -2,7 +2,6 @@
 #include "app.h"
 #include "assert_handler.h"
 #include "i2c.h"
-#include "led.h"
 #include "state_machine.h"
 #include "uart.h"
 

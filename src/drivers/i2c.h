@@ -35,6 +35,7 @@ typedef i2c_status_e (*i2c_read_handler)(uint8_t slave_addr, uint8_t reg_addr, u
                                          uint8_t store_size);
 
 void i2c1_init(uint32_t i2c_speed);
+void i2c1_wait_tx_rx();
 void i2c1_set_slave_address(uint8_t addr, master_mode mode);
 void i2c1_transmit_byte(uint8_t byte, master_operation op);
 void i2c1_generate_stop(void);

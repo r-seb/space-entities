@@ -2,7 +2,6 @@
 #include "TM4C123GH6PM.h"
 #include "active_object.h"
 #include "app.h"
-#include "uart.h"
 #include <stdint.h>
 
 void i2c1_init(uint32_t i2c_speed)
@@ -58,7 +57,7 @@ void i2c1_init(uint32_t i2c_speed)
     I2C1->MTPR = (((SystemCoreClock / (2 * (6 + 4) * i2c_speed)) - 1) << 0);
 
     // 16.3.3.1 I2C Master Interrupts, pg. 1006
-    I2C1->MIMR = (1U << 0) | (1U << 1); // Set IM and CLKIM
+    I2C1->MIMR = (1U << 0); // Set IM
     NVIC_SetPriority(I2C1_IRQn, 6);
     NVIC_EnableIRQ(I2C1_IRQn);
 }
@@ -69,23 +68,14 @@ void I2C1_IRQHandler()
     I2C1->MICR = (1U << 0) | (1U << 1); // Clear IC and CLKIC
 
     static Event i2c_evt = {I2C_ERROR_SIG};
-    if ((mcs & (1U << 4)) || (mcs & 1U << 1) || (mcs & 1U << 7)) { // ARBLST or ERROR or CLKTO
-        Active_post_nonthread(AO_I2CManager, &i2c_evt);
-        return;
+    if ((mcs & (1U << 4)) || (mcs & (1U << 1))) { // ARBLST or ERROR
+        Active_post_front(AO_I2CManager, &i2c_evt);
     }
-    i2c_evt.sig = I2C_TRANSACTION_OK_SIG;
-    Active_post_front(AO_I2CManager, &i2c_evt);
 }
 
-static i2c_status_e i2c1_wait_tx_rx(const char* str)
+void i2c1_wait_tx_rx()
 {
     while ((I2C1->MCS & I2C_STATUS_BUSY)) {}
-    i2c_status_e stat = I2C1->MCS;
-    if (stat & I2C_STATUS_ERROR) {
-        printf_("I2C %s Error\n\r", str);
-        return stat;
-    }
-    return I2C_STATUS_OK;
 }
 
 void i2c1_set_slave_address(uint8_t addr, master_mode mode)
@@ -98,13 +88,12 @@ void i2c1_set_slave_address(uint8_t addr, master_mode mode)
 void i2c1_transmit_byte(uint8_t byte, master_operation op)
 {
     I2C1->MDR = byte;
-    I2C1->MCS = op | (1U << 3);
-    // I2C1->MCS = (1U << 1) | (1U << 0); // ACK, START, RUN
+    I2C1->MCS = op;
 }
 
 void i2c1_generate_stop()
 {
-    I2C1->MCS = (1U << 2) | (1U << 3); // ACK, STOP
+    I2C1->MCS = (1U << 2); // STOP
 }
 
 i2c_status_e i2c1_write(uint8_t slave_addr, uint8_t* buffer, uint8_t buf_size)
