@@ -20,7 +20,7 @@ BraceWrapping:
   SplitEmptyRecord: false
   SplitEmptyNamespace: false
 
-AllowShortFunctionsOnASingleLine: All  # Allow functions on a single line if body is empty
+AllowShortFunctionsOnASingleLine: Empty  # Allow functions on a single line if body is empty
 AllowShortBlocksOnASingleLine: Empty
 SpaceBeforeParens: ControlStatements  # Add space before parentheses in control statements (e.g., `if`, `for`)
 SpaceInEmptyBlock: false
