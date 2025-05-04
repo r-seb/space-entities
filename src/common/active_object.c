@@ -57,7 +57,7 @@ void Active_post(Active* const me, Event const* const e)
 
 void Active_post_front(Active* const me, Event const* const e)
 {
-    UINT status = tx_queue_front_send(&me->queue, (void*)&e, TX_WAIT_FOREVER);
+    UINT status = tx_queue_front_send(&me->queue, (void*)&e, TX_NO_WAIT);
     ASSERT(status == TX_SUCCESS);
 }
 

@@ -6,6 +6,8 @@
 #define UART_MSG_SIZE 41U
 #define UART_DEFERRED_QUEUE_SIZE 32U
 
+#define I2C_DEFERRED_QUEUE_SIZE 32U
+
 enum GameSignals {
     TIME_TICK_SIG = USER_SIG,
     TIME_OUT_SIG,
@@ -28,6 +30,16 @@ enum UartManagerSignals {
     UART_MAX_SIG
 };
 
+enum I2CManagerSignals {
+    I2C_TRANSMIT_START_SIG = UART_MAX_SIG,
+    I2C_RECEIVE_START_SIG,
+    I2C_TRANSACTION_OK_SIG,
+    I2C_ERROR_SIG,
+    I2C_PROCESS_DEFERRED_SIG,
+
+    I2C_MAX_SIG
+};
+
 // ---------------------------------------------------------------------------------------------//
 // Event with parameters
 typedef struct {
@@ -44,6 +56,15 @@ typedef struct {
     // public:
     char buffer[UART_MSG_SIZE];
 } SerialEvent;
+
+typedef struct {
+    Event super;
+
+    // public:
+    uint8_t address;
+    uint8_t* buffer;
+    uint8_t buffer_size;
+} I2CEvent;
 
 // ---------------------------------------------------------------------------------------------//
 // Active objects

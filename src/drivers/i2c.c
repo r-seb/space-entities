@@ -1,6 +1,8 @@
 #include "i2c.h"
 #include "TM4C123GH6PM.h"
-#include "printf.h"
+#include "active_object.h"
+#include "app.h"
+#include "uart.h"
 #include <stdint.h>
 
 void i2c1_init(uint32_t i2c_speed)
@@ -54,6 +56,25 @@ void i2c1_init(uint32_t i2c_speed)
      * TPR = 9
      */
     I2C1->MTPR = (((SystemCoreClock / (2 * (6 + 4) * i2c_speed)) - 1) << 0);
+
+    // 16.3.3.1 I2C Master Interrupts, pg. 1006
+    I2C1->MIMR = (1U << 0) | (1U << 1); // Set IM and CLKIM
+    NVIC_SetPriority(I2C1_IRQn, 6);
+    NVIC_EnableIRQ(I2C1_IRQn);
+}
+
+void I2C1_IRQHandler()
+{
+    uint32_t mcs = I2C1->MCS;
+    I2C1->MICR = (1U << 0) | (1U << 1); // Clear IC and CLKIC
+
+    static Event i2c_evt = {I2C_ERROR_SIG};
+    if ((mcs & (1U << 4)) || (mcs & 1U << 1) || (mcs & 1U << 7)) { // ARBLST or ERROR or CLKTO
+        Active_post_nonthread(AO_I2CManager, &i2c_evt);
+        return;
+    }
+    i2c_evt.sig = I2C_TRANSACTION_OK_SIG;
+    Active_post_front(AO_I2CManager, &i2c_evt);
 }
 
 static i2c_status_e i2c1_wait_tx_rx(const char* str)
@@ -67,64 +88,36 @@ static i2c_status_e i2c1_wait_tx_rx(const char* str)
     return I2C_STATUS_OK;
 }
 
+void i2c1_set_slave_address(uint8_t addr, master_mode mode)
+{
+    // I2C Slave Address should be placed at bit 7:1, pg 1019
+    // Operation at bit 0
+    I2C1->MSA = (addr << 1) | (mode << 0);
+}
+
+void i2c1_transmit_byte(uint8_t byte, master_operation op)
+{
+    I2C1->MDR = byte;
+    I2C1->MCS = op | (1U << 3);
+    // I2C1->MCS = (1U << 1) | (1U << 0); // ACK, START, RUN
+}
+
+void i2c1_generate_stop()
+{
+    I2C1->MCS = (1U << 2) | (1U << 3); // ACK, STOP
+}
+
 i2c_status_e i2c1_write(uint8_t slave_addr, uint8_t* buffer, uint8_t buf_size)
 {
-    // TODO: Add assertions
+    I2CEvent* i2c_evt;
+    EVENT_ALLOCATE(i2c_evt);
+    i2c_evt->super.sig = I2C_TRANSMIT_START_SIG;
+    i2c_evt->address = slave_addr;
+    i2c_evt->buffer = buffer;
+    i2c_evt->buffer_size = buf_size;
 
-    /*
-     * 8. Specify the slave address of the master and that the next operation is a Transmit by
-     * writing the I2CMSA register with a value of 0x0000.0076. This sets the slave address to 0x3B.
-     */
-    I2C1->MSA = slave_addr << 1; // I2C Slave Address should be placed at bit 7:1, pg 1019
-
-    /*
-     * 9. Place data (byte) to be transmitted in the data register by writing the I2CMDR register
-     * with the desired data.
-     */
-    I2C1->MDR = *buffer++;
-
-    i2c_status_e stat = I2C_STATUS_ERROR;
-    // refer pg 1008, Figure 16-8. Master Single TRANSMIT
-    if (buf_size == 1) {
-        /*
-         * 10. Initiate a single byte transmit of the data from Master to Slave by writing the
-         * I2CMCS register with a value of 0x0000.0007 (STOP, START, RUN). refer pg 1023
-         * refer pg 1024, Table 16-5. Write Field Decoding for I2CMCS[3:0] Field
-         */
-        I2C1->MCS = (1U << 2) | (1U << 1) | (1U << 0); // STOP, START, RUN
-
-        /*
-         * 11. Wait until the transmission completes by polling the I2CMCS register's BUSBSY bit
-         * until it has been cleared.
-         */
-        stat = i2c1_wait_tx_rx("Write");
-    }
-    // refer pg 1010, Figure 16-10. Master TRANSMIT of Multiple Data Bytes
-    else if (buf_size > 1) {
-        // Send first data
-        I2C1->MCS = (1U << 1) | (1U << 0); // START, RUN
-        stat = i2c1_wait_tx_rx("Write");
-        if (stat) {
-            return stat;
-        }
-
-        // Send other data
-        while ((buf_size - 1) > 1) {
-            I2C1->MDR = *buffer++;
-            I2C1->MCS = (1U << 0); // RUN
-            stat = i2c1_wait_tx_rx("Write");
-            if (stat) {
-                return stat;
-            }
-            buf_size--;
-        }
-
-        // Send last data
-        I2C1->MDR = *buffer;
-        I2C1->MCS = (1U << 2) | (1U << 0); // STOP, RUN
-        stat = i2c1_wait_tx_rx("Write");
-    }
-    return (stat) ? stat : I2C_STATUS_OK;
+    Active_post_nonthread(AO_I2CManager, (Event*)i2c_evt);
+    return I2C_STATUS_OK;
 }
 
 i2c_status_e i2c1_read(uint8_t slave_addr, uint8_t reg_addr, uint8_t* store, uint8_t store_size)

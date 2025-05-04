@@ -1,15 +1,10 @@
-#include "TM4C123GH6PM.h"
 #include "active_object.h"
 #include "app.h"
 #include "assert_handler.h"
-#include "assets.h"
 #include "delay.h"
-#include "i2c.h"
 #include "led.h"
 #include "mpu6050_i2c.h"
-#include "ssd1309_128x64_i2c.h"
 #include "tx_api.h"
-#include "u8g2.h"
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -17,6 +12,8 @@ static TX_TIMER l_timer_tick;
 static void l_timer_tick_fn(ULONG id)
 {
     TimeEvent_tick();
+    static Event const time_tick_evt = {TIME_TICK_SIG};
+    Active_post_nonthread(AO_Passageway, &time_tick_evt);
 }
 
 /*
@@ -36,17 +33,12 @@ TX_BLOCK_POOL thread_block_pool;
 #define MSG_EVT_BYTE_POOL_SIZE 800U // sized for 5 AO queues + remaining for events
 TX_BYTE_POOL msg_evt_byte_pool;
 
-u8g2_t oled;
-
 int main()
 {
     SystemCoreClockUpdate();
     led_init();
     delay_init();
-    i2c1_init(I2C_1Mbps);
-    ssd1309_128x64_init(&oled, &i2c1_write);
-    mpu6050_init(&i2c1_write, &i2c1_read);
-    printf_("Hello from Tiva!!\n\r");
+    // mpu6050_init(&i2c1_write, &i2c1_read);
 
     /* Enter the ThreadX kernel. */
     tx_kernel_enter();
@@ -62,14 +54,6 @@ int main()
         if (mpu6050_is_data_ready()) {
             mpu6050_read_data(&imu);
         }
-
-        // Clear buffer and draw the player ship
-        u8g2_ClearBuffer(&oled);
-        u8g2_SetFont(&oled, u8g2_font_siji_t_6x10);
-        u8g2_DrawGlyph(&oled, x - 10, y, 0xe19d);
-        u8g2_DrawXBM(&oled, x + 10, y, 8, 7, mine_bmp);
-        u8g2_DrawXBM(&oled, x, y, 8, 8, player_ship1_bmp);
-        u8g2_SendBuffer(&oled);
 
         // UP-DOWN Movement
         if (imu.accx > move_thres) {
@@ -109,7 +93,7 @@ void tx_application_define(void* first_unused_memory)
     UINT status;
 
     // Timer responsible for calling all active objects TimeEvent
-    status = tx_timer_create(&l_timer_tick, "timer tick", &l_timer_tick_fn, 0U, 1U, 1U,
+    status = tx_timer_create(&l_timer_tick, "timer tick", &l_timer_tick_fn, 0U, 40U, 40U,
                              TX_AUTO_ACTIVATE);
     ASSERT(status == TX_SUCCESS);
 
@@ -129,11 +113,11 @@ void tx_application_define(void* first_unused_memory)
 
     // Create AO and start them
     Passageway_ctor_call();
-    Active_start(AO_Passageway, 0, &thread_block_pool, THREAD_STACK_SIZE, &stack_ptr,
+    Active_start(AO_Passageway, 1, &thread_block_pool, THREAD_STACK_SIZE, &stack_ptr,
                  &msg_evt_byte_pool, MSG_QUEUE_SIZE, &queue_ptr);
 
     I2CManager_ctor_call();
-    Active_start(AO_I2CManager, 1, &thread_block_pool, THREAD_STACK_SIZE, &stack_ptr,
+    Active_start(AO_I2CManager, 0, &thread_block_pool, THREAD_STACK_SIZE, &stack_ptr,
                  &msg_evt_byte_pool, MSG_QUEUE_SIZE, &queue_ptr);
 
     UARTManager_ctor_call();

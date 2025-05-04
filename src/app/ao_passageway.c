@@ -1,7 +1,10 @@
 #include "active_object.h"
 #include "app.h"
+#include "i2c.h"
 #include "led.h"
-#include "printf.h"
+#include "ssd1309_128x64_i2c.h"
+#include "state_machine.h"
+#include "uart.h"
 
 typedef struct {
     Active super;
@@ -18,36 +21,53 @@ Active* AO_Passageway = &passageway.super; // Global pointer so that others can 
 
 // Function prototypes
 static void Passageway_ctor(Passageway* const me);
-static void Passageway_dispatch(Passageway* me, Event const* const e);
+static State Passageway_initial(Passageway* me, Event const* const e);
+static State Passageway_playing(Passageway* me, Event const* const e);
+static State Passageway_game_over(Passageway* me, Event const* const e);
 
 void Passageway_ctor_call() { Passageway_ctor(&passageway); } // To be called by main
 
 static void Passageway_ctor(Passageway* const me)
 {
-    Active_ctor(&me->super, (StateHandler)&Passageway_dispatch);
+    Active_ctor(&me->super, (StateHandler)&Passageway_initial);
     TimeEvent_ctor(&me->time_event, TIME_OUT_SIG, &me->super);
 }
 
-static void Passageway_dispatch(Passageway* me, Event const* const e)
+// ---------------------------------------------------------------------------------------------//
+// State Machine
+static State Passageway_initial(Passageway* me, Event const* const e)
 {
-    UINT status;
+    return TRAN(&Passageway_playing);
+}
+
+static State Passageway_playing(Passageway* me, Event const* const e)
+{
+    State state_stat;
     switch (e->sig) {
-        case INIT_SIG: {
-            printf_("Passageway Initialized\n\r");
+        case ENTRY_SIG: {
+            uart_send("Passageway Initialized\n\r");
             // Post the TIME_OUT_SIG every 1 second
-            TimeEvent_arm(&me->time_event, 1000U, 1000U);
+            TimeEvent_arm(&me->time_event, 25U, 25U);
+            state_stat = HANDLED_STATUS;
+        } break;
+        case TIME_TICK_SIG: {
+            //uart_send("TICK-TOCK");
+            state_stat = HANDLED_STATUS;
+            Passageway_move(me);
         } break;
         case TIME_OUT_SIG: {
             led_toggle(LED_BLUE);
+            state_stat = HANDLED_STATUS;
         } break;
         case SHIP_IMG_SIG: {
-            printf_("Mine PosX=%u, PosY=%u \n\r", EVENT_CAST(PositionEvent)->x,
-                    EVENT_CAST(PositionEvent)->y);
-            status = EVENT_HANDLED();
-            printf_("Byte Released: %d\n\r", status);
+            uart_send("Mine PosX=%u, PosY=%u \n\r", EVENT_CAST(PositionEvent)->x,
+                      EVENT_CAST(PositionEvent)->y);
+            EVENT_HANDLED();
+            state_stat = HANDLED_STATUS;
         } break;
         default:
-            printf_("Passageway Default State\n\r");
+            state_stat = IGNORED_STATUS;
             break;
     }
+    return state_stat;
 }
