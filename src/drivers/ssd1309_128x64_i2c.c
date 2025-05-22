@@ -10,7 +10,7 @@ static i2c_write_handler i2c_write;
 void ssd1309_128x64_init(u8g2_t* oled, i2c_write_handler write_handler)
 {
     i2c_write = write_handler;
-    u8g2_Setup_ssd1309_i2c_128x64_noname2_f(oled, U8G2_R0, u8x8_i2c, u8x8_gpio_and_delay_i2c);
+    u8g2_Setup_ssd1309_i2c_128x64_noname0_f(oled, U8G2_R0, u8x8_i2c, u8x8_gpio_and_delay_i2c);
     u8g2_InitDisplay(oled);
     u8g2_SetPowerSave(oled, 0);
     u8g2_ClearDisplay(oled);
@@ -41,12 +41,6 @@ uint8_t u8x8_i2c(u8x8_t* u8x8, uint8_t msg, uint8_t arg_int, void* arg_ptr)
                 data++;
                 arg_int--;
             }
-            break;
-        case U8X8_MSG_BYTE_INIT:
-            // i2c1_init();
-            break;
-        case U8X8_MSG_BYTE_SET_DC:
-            /* ignored for i2c */
             break;
         case U8X8_MSG_BYTE_START_TRANSFER:
             buf_idx = 0;

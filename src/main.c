@@ -30,7 +30,7 @@ TX_BLOCK_POOL thread_block_pool;
  * Queue size = 20 messages * 4 bytes-per-msg = 80 bytes.
  */
 #define MSG_QUEUE_SIZE 80U
-#define MSG_EVT_BYTE_POOL_SIZE 800U // sized for 5 AO queues + remaining for events
+#define MSG_EVT_BYTE_POOL_SIZE 1800U // sized for 5 AO queues + remaining for events
 TX_BYTE_POOL msg_evt_byte_pool;
 
 int main()

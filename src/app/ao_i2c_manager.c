@@ -4,6 +4,7 @@
 #include "i2c.h"
 #include "state_machine.h"
 #include "uart.h"
+#include <stdbool.h>
 
 // ---------------------------------------------------------------------------------------------//
 // Simple FIFO
@@ -49,9 +50,7 @@ typedef struct {
 
     // private:
     Queue deferred_queue;
-    uint8_t* cur_buf;
-    uint8_t cur_buf_size;
-    uint8_t cur_buf_idx;
+    i2c_data cur_data;
 } I2CManager;
 
 static I2CManager i2c_manager;
@@ -59,7 +58,7 @@ Active* AO_I2CManager = &i2c_manager.super; // Global pointer so that others can
 
 // Function prototypes
 static void I2CManager_ctor(I2CManager* const me);
-static void I2CManager_set_cur_buffer(Event const* const e);
+static void I2CManager_set_cur_buffer(Event const* const e, bool transmit);
 static State I2CManager_initial(I2CManager* me, Event const* const e);
 static State I2CManager_idle(I2CManager* me, Event const* const e);
 static State I2CManager_master_transmit(I2CManager* me, Event const* const e);
@@ -80,12 +79,18 @@ static void I2CManager_ctor(I2CManager* const me)
     i2c1_init(I2C_1Mbps);
 }
 
-static void I2CManager_set_cur_buffer(Event const* const e)
+static void I2CManager_set_cur_buffer(Event const* const e, bool transmit)
 {
-    i2c1_set_slave_address(EVENT_CAST(I2CEvent)->address, I2C_MASTER_TRANSMIT);
-    i2c_manager.cur_buf = EVENT_CAST(I2CEvent)->buffer;
-    i2c_manager.cur_buf_size = EVENT_CAST(I2CEvent)->buffer_size;
-    i2c_manager.cur_buf_idx = 0;
+    i2c_manager.cur_data.slave_addr = EVENT_CAST(I2CEvent)->data.slave_addr;
+    i2c_manager.cur_data.read_addr = EVENT_CAST(I2CEvent)->data.read_addr;
+    i2c_manager.cur_data.buffer_size = EVENT_CAST(I2CEvent)->data.buffer_size;
+    if (transmit) {
+        memcpy(i2c_manager.cur_data.write_buffer, EVENT_CAST(I2CEvent)->data.write_buffer,
+               i2c_manager.cur_data.buffer_size);
+    } else {
+        i2c_manager.cur_data.store_buffer = EVENT_CAST(I2CEvent)->data.store_buffer;
+    }
+
     EVENT_HANDLED();
 }
 
@@ -105,17 +110,12 @@ static State I2CManager_idle(I2CManager* me, Event const* const e)
             // Do we have deferred i2c events to process?
             Event* evt_addr = (Event*)0;
             if (Queue_pop(&me->deferred_queue, &evt_addr) == QUEUE_SUCCESS) {
-                I2CManager_set_cur_buffer(evt_addr);
-                static Event const process_deferred_sig = {I2C_PROCESS_DEFERRED_SIG};
-                Active_post_front(AO_I2CManager, &process_deferred_sig);
+                Active_post_front(AO_I2CManager, evt_addr);
             }
             state_stat = HANDLED_STATUS;
         } break;
-        case I2C_PROCESS_DEFERRED_SIG: {
-            state_stat = TRAN(&I2CManager_master_transmit);
-        } break;
         case I2C_TRANSMIT_START_SIG: {
-            I2CManager_set_cur_buffer(e);
+            I2CManager_set_cur_buffer(e, true);
             state_stat = TRAN(&I2CManager_master_transmit);
         } break;
         default:
@@ -132,31 +132,8 @@ static State I2CManager_master_transmit(I2CManager* me, Event const* const e)
     State state_stat;
     switch (e->sig) {
         case ENTRY_SIG: {
-            // Transmit single byte
-            if (me->cur_buf_size == 1) {
-                i2c1_transmit_byte(*me->cur_buf, I2C_STOP_START_RUN_OP);
-            }
-            // Transfer multiple bytes
-            else {
-                // Transmit first byte
-                i2c1_transmit_byte(*me->cur_buf, I2C_START_RUN_OP);
-                i2c1_wait_tx_rx();
-                while (1) {
-                    me->cur_buf_idx++;
-                    // Are we finished?
-                    if (me->cur_buf_idx == me->cur_buf_size - 1) {
-                        i2c1_transmit_byte(me->cur_buf[me->cur_buf_idx], I2C_STOP_RUN_OP);
-                        break;
-                    }
-                    // Transmit remaining bytes
-                    else {
-                        i2c1_transmit_byte(me->cur_buf[me->cur_buf_idx], I2C_RUN_OP);
-                        i2c1_wait_tx_rx();
-                    }
-                }
-            }
-            static Event i2c_evt = {I2C_TRANSACTION_OK_SIG};
-            Active_post(AO_I2CManager, &i2c_evt);
+            me->cur_data.mode = I2C_MASTER_TRANSMIT;
+            i2c1_transmit(&me->cur_data);
             state_stat = HANDLED_STATUS;
         } break;
         case I2C_ERROR_SIG: {
@@ -168,7 +145,7 @@ static State I2CManager_master_transmit(I2CManager* me, Event const* const e)
             state_stat = TRAN(&I2CManager_idle);
         } break;
         case I2C_TRANSMIT_START_SIG: {
-            //  Defer the transmit event, it will be handled back in idle state
+            //  Defer the event, it will be handled back in idle state
             Queue_push(&me->deferred_queue, e);
             state_stat = HANDLED_STATUS;
         } break;

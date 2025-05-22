@@ -1,6 +1,7 @@
 #pragma once
 
 #include "active_object.h"
+#include "i2c.h"
 #include "stdint.h"
 
 #define UART_MSG_SIZE 41U
@@ -61,9 +62,7 @@ typedef struct {
     Event super;
 
     // public:
-    uint8_t address;
-    uint8_t* buffer;
-    uint8_t buffer_size;
+    i2c_data data;
 } I2CEvent;
 
 // ---------------------------------------------------------------------------------------------//
