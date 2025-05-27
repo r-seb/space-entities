@@ -1,7 +1,7 @@
 #pragma once
 
-#include <stdint.h>
 #include "tx_api.h"
+#include <stdint.h>
 
 extern TX_BYTE_POOL msg_evt_byte_pool;
 
@@ -9,7 +9,9 @@ extern TX_BYTE_POOL msg_evt_byte_pool;
 
 #define EVENT_ALLOCATE(evt_)                                                                       \
     (tx_byte_allocate(&msg_evt_byte_pool, (VOID**)&(evt_), sizeof(*(evt_)), TX_NO_WAIT))
-#define EVENT_HANDLED() (tx_byte_release((VOID*)e))
+#define EVENT_ALLOCATE_WITH_SIZE(evt_, size_)                                                      \
+    (tx_byte_allocate(&msg_evt_byte_pool, (VOID**)&(evt_), size_, TX_NO_WAIT))
+#define EVENT_HANDLED(evt_) (tx_byte_release((VOID*)evt_))
 
 // ---------------------------------------------------------------------------------------------//
 // Event Facilities

@@ -80,7 +80,7 @@ static void UARTManager_set_cur_buffer(Event const* const e)
     // TODO: Experiment with DMA
     memcpy(uart_manager.cur_buffer, EVENT_CAST(SerialEvent)->buffer, UART_MSG_SIZE);
     uart_manager.char_ptr = uart_manager.cur_buffer;
-    EVENT_HANDLED();
+    EVENT_HANDLED(e);
 }
 
 // ---------------------------------------------------------------------------------------------//

@@ -91,7 +91,7 @@ static void I2CManager_set_cur_buffer(Event const* const e, bool transmit)
         i2c_manager.cur_data.store_buffer = EVENT_CAST(I2CEvent)->data.store_buffer;
     }
 
-    EVENT_HANDLED();
+    EVENT_HANDLED(e);
 }
 
 // ---------------------------------------------------------------------------------------------//
