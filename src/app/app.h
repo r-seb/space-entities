@@ -4,7 +4,7 @@
 #include "i2c.h"
 #include "stdint.h"
 
-#define UART_MSG_SIZE 41U
+#define UART_MSG_SIZE 100U
 #define UART_DEFERRED_QUEUE_SIZE 32U
 
 #define I2C_DEFERRED_QUEUE_SIZE 32U
@@ -55,7 +55,8 @@ typedef struct {
     Event super;
 
     // public:
-    char buffer[UART_MSG_SIZE];
+    uint8_t buffer_size;
+    char buffer[];
 } SerialEvent;
 
 typedef struct {

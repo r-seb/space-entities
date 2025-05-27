@@ -64,7 +64,11 @@ static State UARTManager_initial(UARTManager* me, Event const* const e);
 static State UARTManager_idle(UARTManager* me, Event const* const e);
 static State UARTManager_busy(UARTManager* me, Event const* const e);
 
-void UARTManager_ctor_call() { UARTManager_ctor(&uart_manager); } // To be called by main
+// To be called by main
+void UARTManager_ctor_call()
+{
+    UARTManager_ctor(&uart_manager);
+}
 
 static void UARTManager_ctor(UARTManager* const me)
 {
@@ -78,7 +82,8 @@ static void UARTManager_ctor(UARTManager* const me)
 static void UARTManager_set_cur_buffer(Event const* const e)
 {
     // TODO: Experiment with DMA
-    memcpy(uart_manager.cur_buffer, EVENT_CAST(SerialEvent)->buffer, UART_MSG_SIZE);
+    memcpy(uart_manager.cur_buffer, EVENT_CAST(SerialEvent)->buffer,
+           EVENT_CAST(SerialEvent)->buffer_size);
     uart_manager.char_ptr = uart_manager.cur_buffer;
     EVENT_HANDLED(e);
 }
@@ -87,6 +92,7 @@ static void UARTManager_set_cur_buffer(Event const* const e)
 // State Machine
 static State UARTManager_initial(UARTManager* me, Event const* const e)
 {
+    uart_send("UARTManager Initialized\n\r");
     return TRAN(&UARTManager_idle);
 }
 

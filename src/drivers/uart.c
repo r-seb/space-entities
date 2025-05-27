@@ -5,6 +5,7 @@
 #include "assert_handler.h"
 #include "printf/printf.h"
 #include <stdint.h>
+#include <string.h>
 
 void uart_init(uint32_t baud_rate)
 {
@@ -118,17 +119,25 @@ void UART0_IRQHandler()
 
 int uart_send(const char* format, ...)
 {
-    SerialEvent* serial_evt;
-    EVENT_ALLOCATE(serial_evt);
-    serial_evt->super.sig = UART_SEND_SIG;
-
+    static char buffer[UART_MSG_SIZE]; // Character limit
     va_list args;
     va_start(args, format);
-    const int ret = vsnprintf_(serial_evt->buffer, sizeof(serial_evt->buffer), format, args);
+    const int buf_size = vsnprintf_(buffer, sizeof(buffer), format, args);
     va_end(args);
 
+    // Flexible array members
+    // https://developer.arm.com/documentation/dui0375/g/Compiler-Coding-Practices/Flexible-array-members-in-C99
+    uint32_t total_size = sizeof(SerialEvent) + buf_size;
+    SerialEvent* serial_evt;
+    EVENT_ALLOCATE_WITH_SIZE(serial_evt, total_size);
+    serial_evt->super.sig = UART_SEND_SIG;
+    // NOTE: String formatted using vsnprintf_ is automatically null-terminated so we also include
+    // it, hence the +1
+    serial_evt->buffer_size = buf_size + 1;
+    memcpy(serial_evt->buffer, buffer, buf_size + 1);
+
     Active_post_nonthread(AO_UARTManager, (Event*)serial_evt);
-    return ret;
+    return buf_size;
 }
 
 void uart_fill_fifo(char** c)
@@ -145,4 +154,7 @@ void uart_fill_fifo(char** c)
 }
 
 // To avoid undefined reference since printf.c expects an implementation
-void putchar_(char c) { (void)c; }
+void putchar_(char c)
+{
+    (void)c;
+}
