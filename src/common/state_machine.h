@@ -5,7 +5,7 @@
 
 extern TX_BYTE_POOL msg_evt_byte_pool;
 
-#define EVENT_CAST(type_) ((type_ const*)(e))
+#define EVENT_CAST(evt_, type_) ((type_ const*)(evt_))
 
 #define EVENT_ALLOCATE(evt_)                                                                       \
     (tx_byte_allocate(&msg_evt_byte_pool, (VOID**)&(evt_), sizeof(*(evt_)), TX_NO_WAIT))

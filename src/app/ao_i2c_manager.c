@@ -81,14 +81,14 @@ static void I2CManager_ctor(I2CManager* const me)
 
 static void I2CManager_set_cur_buffer(Event const* const e, bool transmit)
 {
-    i2c_manager.cur_data.slave_addr = EVENT_CAST(I2CEvent)->data.slave_addr;
-    i2c_manager.cur_data.read_addr = EVENT_CAST(I2CEvent)->data.read_addr;
-    i2c_manager.cur_data.buffer_size = EVENT_CAST(I2CEvent)->data.buffer_size;
+    i2c_manager.cur_data.slave_addr = EVENT_CAST(e, I2CEvent)->data.slave_addr;
+    i2c_manager.cur_data.read_addr = EVENT_CAST(e, I2CEvent)->data.read_addr;
+    i2c_manager.cur_data.buffer_size = EVENT_CAST(e, I2CEvent)->data.buffer_size;
     if (transmit) {
-        memcpy(i2c_manager.cur_data.write_buffer, EVENT_CAST(I2CEvent)->data.write_buffer,
+        memcpy(i2c_manager.cur_data.write_buffer, EVENT_CAST(e, I2CEvent)->data.write_buffer,
                i2c_manager.cur_data.buffer_size);
     } else {
-        i2c_manager.cur_data.store_buffer = EVENT_CAST(I2CEvent)->data.store_buffer;
+        i2c_manager.cur_data.store_buffer = EVENT_CAST(e, I2CEvent)->data.store_buffer;
     }
 
     EVENT_HANDLED(e);

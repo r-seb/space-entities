@@ -60,8 +60,8 @@ static State Passageway_playing(Passageway* me, Event const* const e)
             state_stat = HANDLED_STATUS;
         } break;
         case SHIP_IMG_SIG: {
-            uart_send("Mine PosX=%u, PosY=%u \n\r", EVENT_CAST(PositionEvent)->x,
-                      EVENT_CAST(PositionEvent)->y);
+            uart_send("Mine PosX=%u, PosY=%u \n\r", EVENT_CAST(e, PositionEvent)->x,
+                      EVENT_CAST(e, PositionEvent)->y);
             EVENT_HANDLED(e);
             state_stat = HANDLED_STATUS;
         } break;
