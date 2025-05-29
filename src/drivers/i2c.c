@@ -148,7 +148,7 @@ void i2c1_generate_stop()
 i2c_status_e i2c1_write(uint8_t slave_addr, uint8_t* buffer, uint8_t buf_size)
 {
     I2CEvent* i2c_evt;
-    EVENT_ALLOCATE(i2c_evt);
+    EVENT_ALLOCATE(msg_evt_byte_pool, i2c_evt);
     i2c_evt->super.sig = I2C_TRANSMIT_START_SIG;
     i2c_evt->data.slave_addr = slave_addr;
     memcpy(i2c_evt->data.write_buffer, buffer, buf_size);

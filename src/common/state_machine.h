@@ -3,14 +3,12 @@
 #include "tx_api.h"
 #include <stdint.h>
 
-extern TX_BYTE_POOL msg_evt_byte_pool;
-
 #define EVENT_CAST(evt_, type_) ((type_ const*)(evt_))
 
-#define EVENT_ALLOCATE(evt_)                                                                       \
-    (tx_byte_allocate(&msg_evt_byte_pool, (VOID**)&(evt_), sizeof(*(evt_)), TX_NO_WAIT))
-#define EVENT_ALLOCATE_WITH_SIZE(evt_, size_)                                                      \
-    (tx_byte_allocate(&msg_evt_byte_pool, (VOID**)&(evt_), size_, TX_NO_WAIT))
+#define EVENT_ALLOCATE(byte_pool_, evt_)                                                           \
+    (tx_byte_allocate(&byte_pool_, (VOID**)&(evt_), sizeof(*(evt_)), TX_NO_WAIT))
+#define EVENT_ALLOCATE_WITH_SIZE(byte_pool_, evt_, size_)                                          \
+    (tx_byte_allocate(&byte_pool_, (VOID**)&(evt_), size_, TX_NO_WAIT))
 #define EVENT_HANDLED(evt_) (tx_byte_release((VOID*)evt_))
 
 // ---------------------------------------------------------------------------------------------//

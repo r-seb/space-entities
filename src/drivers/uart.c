@@ -129,7 +129,7 @@ int uart_send(const char* format, ...)
     // https://developer.arm.com/documentation/dui0375/g/Compiler-Coding-Practices/Flexible-array-members-in-C99
     uint32_t total_size = sizeof(SerialEvent) + buf_size;
     SerialEvent* serial_evt;
-    EVENT_ALLOCATE_WITH_SIZE(serial_evt, total_size);
+    EVENT_ALLOCATE_WITH_SIZE(msg_evt_byte_pool, serial_evt, total_size);
     serial_evt->super.sig = UART_SEND_SIG;
     // NOTE: String formatted using vsnprintf_ is automatically null-terminated so we also include
     // it, hence the +1
