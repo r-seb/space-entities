@@ -10,6 +10,7 @@
 #define I2C_DEFERRED_QUEUE_SIZE 32U
 
 extern TX_BYTE_POOL msg_evt_byte_pool;
+extern TX_BYTE_POOL uart_evt_byte_pool;
 
 enum GameSignals {
     TIME_TICK_SIG = USER_SIG,

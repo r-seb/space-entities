@@ -31,7 +31,9 @@ TX_BLOCK_POOL thread_block_pool;
  */
 #define MSG_QUEUE_SIZE 80U
 #define MSG_EVT_BYTE_POOL_SIZE 3000U // sized for 5 AO queues + remaining for events
+#define UART_EVT_BYTE_POOL_SIZE 500U
 TX_BYTE_POOL msg_evt_byte_pool;
+TX_BYTE_POOL uart_evt_byte_pool;
 
 int main()
 {
@@ -106,6 +108,12 @@ void tx_application_define(void* first_unused_memory)
     void* next_unused_memory = (UCHAR*)first_unused_memory + THREAD_BLOCK_POOL_SIZE;
     status = tx_byte_pool_create(&msg_evt_byte_pool, "message event byte pool", next_unused_memory,
                                  MSG_EVT_BYTE_POOL_SIZE);
+    ASSERT(status == TX_SUCCESS);
+
+    // For uart events
+    next_unused_memory = (UCHAR*)next_unused_memory + MSG_EVT_BYTE_POOL_SIZE;
+    status = tx_byte_pool_create(&uart_evt_byte_pool, "uart event byte pool", next_unused_memory,
+                                 UART_EVT_BYTE_POOL_SIZE);
     ASSERT(status == TX_SUCCESS);
 
     CHAR* stack_ptr;
