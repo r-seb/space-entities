@@ -47,7 +47,7 @@ static State Passageway_playing(Passageway* me, Event const* const e)
         case ENTRY_SIG: {
             uart_send("Passageway Initialized\n\r");
             // Post the TIME_OUT_SIG every 1 second
-            TimeEvent_arm(&me->time_event, 25U, 25U);
+            TimeEvent_arm(&me->time_event, 50U, 50U);
             state_stat = HANDLED_STATUS;
         } break;
         case TIME_TICK_SIG: {
