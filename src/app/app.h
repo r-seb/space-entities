@@ -7,7 +7,7 @@
 #define UART_MSG_SIZE 100U
 #define UART_DEFERRED_QUEUE_SIZE 32U
 
-#define I2C_DEFERRED_QUEUE_SIZE 32U
+#define I2C_DEFERRED_QUEUE_SIZE 64U
 
 extern TX_BYTE_POOL msg_evt_byte_pool;
 extern TX_BYTE_POOL uart_evt_byte_pool;
@@ -39,7 +39,7 @@ enum I2CManagerSignals {
     I2C_RECEIVE_START_SIG,
     I2C_TRANSACTION_OK_SIG,
     I2C_ERROR_SIG,
-    I2C_PROCESS_DEFERRED_SIG,
+    I2C_RECEIVE_DONE_SIG,
 
     I2C_MAX_SIG
 };

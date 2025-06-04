@@ -4,6 +4,9 @@
 #include "app.h"
 #include "assert_handler.h"
 #include "led.h"
+#include "state_machine.h"
+#include "tx_api.h"
+#include "uart.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
@@ -72,7 +75,6 @@ static i2c_data* _cur_data;
 
 void I2C1_IRQHandler()
 {
-
     I2C1->MICR = (1U << 0); // Clear IC
 
     uint32_t mcs = I2C1->MCS;
@@ -84,35 +86,50 @@ void I2C1_IRQHandler()
     }
     // ARBLST or ERROR
     else if ((mcs & (1U << 4)) || (mcs & (1U << 1))) {
+        // TODO: Handle errata, I2C#07
         _cur_buffer = NULL;
         Active_post_front(AO_I2CManager, &i2c_evt);
     }
     // Last transaction (transmit/receive) must be ok
     else {
-        // TODO: READ Operation
-        uint8_t dr = I2C1->MDR;
+        i2c_evt.sig = I2C_TRANSACTION_OK_SIG;
 
-        // Do we still have bytes to transfer?
-        if (_cur_buffer_size > 0) {
-            uint8_t op = I2C_RUN_OP;
+        uint8_t op = I2C_RUN_OP;
+        bool done = false;
+
+        if (_cur_data->mode == I2C_MASTER_RECEIVE) {
+            *_cur_buffer++ = I2C1->MDR;
+
+            if (_cur_buffer_size == 0) {
+                done = true; // Last byte was just received
+            } else {
+                op |= I2C_ACK_OP;
+            }
+
+        } else if (_cur_data->mode == I2C_MASTER_TRANSMIT) {
+
+            if (_cur_buffer_size == 0) {
+                done = true; // Nothing to send
+            } else {
+                I2C1->MDR = *_cur_buffer++;
+            }
+        }
+
+        if (done) {
+            Active_post_front(AO_I2CManager, &i2c_evt);
+            _cur_data = NULL;
+            _cur_buffer = NULL;
+
+        } else {
             // Is this the last byte?
             if (_cur_buffer_size == 1) {
-                op |= I2C_STOP_OP;
+                op = (op & ~I2C_ACK_OP) | I2C_STOP_OP;
             }
             _cur_buffer_size--;
-            I2C1->MDR = *_cur_buffer++;
+
             I2C1->MCS = op;
-        } else {
-            i2c_evt.sig = I2C_TRANSACTION_OK_SIG;
-            _cur_buffer = NULL;
-            Active_post_nonthread(AO_I2CManager, &i2c_evt);
         }
     }
-}
-
-void i2c1_wait_tx_rx()
-{
-    while ((I2C1->MCS & I2C_STATUS_BUSY)) {}
 }
 
 void i2c1_set_slave_address(uint8_t addr, master_mode mode)
@@ -127,16 +144,33 @@ void i2c1_transmit(i2c_data* data)
     ASSERT(data->mode == I2C_MASTER_TRANSMIT);
     _cur_data = data;
     _cur_buffer = data->write_buffer;
-    _cur_buffer_size = data->buffer_size;
+    _cur_buffer_size = data->write_buffer_size;
 
     // Set up to transfer first byte
     i2c1_set_slave_address(data->slave_addr, data->mode);
     uint8_t op = I2C_START_OP | I2C_RUN_OP;
-    if (_cur_data->buffer_size == 1) {
+    if (_cur_data->write_buffer_size == 1) {
         op |= I2C_STOP_OP;
     }
     _cur_buffer_size--;
     I2C1->MDR = *_cur_buffer++;
+    I2C1->MCS = op;
+}
+
+void i2c1_receive(i2c_data* data)
+{
+    ASSERT(data->mode == I2C_MASTER_RECEIVE);
+    _cur_data = data;
+    _cur_buffer = data->store_buffer;
+    _cur_buffer_size = data->store_buffer_size;
+
+    // Set up to receive first byte
+    i2c1_set_slave_address(data->slave_addr, data->mode);
+    uint8_t op = I2C_ACK_OP | I2C_START_OP | I2C_RUN_OP;
+    if (_cur_buffer_size == 1) {
+        op = (op & ~I2C_ACK_OP) | I2C_STOP_OP;
+    }
+    _cur_buffer_size--;
     I2C1->MCS = op;
 }
 
@@ -147,60 +181,46 @@ void i2c1_generate_stop()
 
 i2c_status_e i2c1_write(uint8_t slave_addr, uint8_t* buffer, uint8_t buf_size)
 {
+    // Flexible array members
+    // https://developer.arm.com/documentation/dui0375/g/Compiler-Coding-Practices/Flexible-array-members-in-C99
+    uint32_t total_size = sizeof(I2CEvent) + buf_size;
     I2CEvent* i2c_evt;
-    EVENT_ALLOCATE(msg_evt_byte_pool, i2c_evt);
-    i2c_evt->super.sig = I2C_TRANSMIT_START_SIG;
-    i2c_evt->data.slave_addr = slave_addr;
-    memcpy(i2c_evt->data.write_buffer, buffer, buf_size);
-    i2c_evt->data.buffer_size = buf_size;
+    // NOTE: This call is not supported by an isr, it returns TX_CALLER_ERROR
+    UINT status = EVENT_ALLOCATE_WITH_SIZE(msg_evt_byte_pool, i2c_evt, total_size);
+    if (status == TX_SUCCESS) {
+        i2c_evt->super.sig = I2C_TRANSMIT_START_SIG;
+        i2c_evt->data.slave_addr = slave_addr;
+        i2c_evt->data.write_buffer_size = buf_size;
+        memcpy(i2c_evt->data.write_buffer, buffer, buf_size);
 
-    Active_post_nonthread(AO_I2CManager, (Event*)i2c_evt);
-    return I2C_STATUS_OK;
+        Active_post_nonthread(AO_I2CManager, (Event*)i2c_evt);
+        return I2C_STATUS_OK;
+    }
+    uart_send("I2Cpool error: 0x%X\n\r", status);
+    return I2C_STATUS_ERROR;
 }
 
-i2c_status_e i2c1_read(uint8_t slave_addr, uint8_t reg_addr, uint8_t* store, uint8_t store_size)
+i2c_status_e i2c1_read(uint8_t slave_addr, uint8_t reg_addr, uint8_t* store, uint8_t store_size,
+                       Active* requester)
 {
-    // TODO: Add assertions
+    // Flexible array members
+    // https://developer.arm.com/documentation/dui0375/g/Compiler-Coding-Practices/Flexible-array-members-in-C99
+    uint32_t total_size = sizeof(I2CEvent) + 1;
+    I2CEvent* i2c_evt;
+    // NOTE: This call is not supported by an isr, it returns TX_CALLER_ERROR
+    UINT status = EVENT_ALLOCATE_WITH_SIZE(msg_evt_byte_pool, i2c_evt, total_size);
+    if (status == TX_SUCCESS) {
+        i2c_evt->data.requester = requester;
+        i2c_evt->super.sig = I2C_RECEIVE_START_SIG;
+        i2c_evt->data.slave_addr = slave_addr;
+        i2c_evt->data.store_buffer_size = store_size;
+        i2c_evt->data.write_buffer_size = 1;
+        i2c_evt->data.store_buffer = store;
+        i2c_evt->data.write_buffer[0] = reg_addr;
 
-    i2c1_write(slave_addr, &reg_addr, 1);
-
-    // Transition to receive operation
-    I2C1->MSA = (slave_addr << 1) | (1U << 0);
-
-    i2c_status_e stat = I2C_STATUS_ERROR;
-    // refer pg. 1009, Figure 16-9. Master Single RECEIVE
-    if (store_size == 1) {
-        I2C1->MCS = (1U << 2) | (1U << 1) | (1U << 0); // STOP, START, RUN
-        stat = i2c1_wait_tx_rx("Read");
-        *store = (stat) ? 0x00 : I2C1->MDR;
-        // while ((I2C1->MCS & (1U << 6))) {}
+        Active_post_nonthread(AO_I2CManager, (Event*)i2c_evt);
+        return I2C_STATUS_OK;
     }
-    // refer pg. 1011, Figure 16-11. Master RECEIVE of Multiple Data Bytes
-    else if (store_size > 1) {
-        // Read first data
-        I2C1->MCS = (1U << 3) | (1U << 1) | (1U << 0); // ACK, START, RUN
-        stat = i2c1_wait_tx_rx("Read");
-        if (stat) {
-            return stat;
-        }
-        *store++ = I2C1->MDR;
-
-        // Read other data
-        while ((store_size - 0) > 1) {
-            I2C1->MCS = (1U << 3) | (1U << 0); // ACK, RUN
-            stat = i2c1_wait_tx_rx("Read");
-            if (stat) {
-                return stat;
-            }
-            *store++ = I2C1->MDR;
-            store_size--;
-        }
-
-        // Read last data
-        I2C1->MCS = (1U << 2) | (1U << 0); // STOP, RUN
-        stat = i2c1_wait_tx_rx("Read");
-        *store = I2C1->MDR;
-        // while ((I2C1->MCS & (1U << 6))) {}
-    }
-    return (stat) ? stat : I2C_STATUS_OK;
+    uart_send("I2Cpool error: 0x%X\n\r", status);
+    return I2C_STATUS_ERROR;
 }
