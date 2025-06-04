@@ -14,6 +14,7 @@ typedef struct {
     uint16_t head;
     uint16_t tail;
     uint16_t size; // The array size, must be initialized
+    uint16_t events_loss;
 } Queue;
 
 typedef enum { QUEUE_SUCCESS, QUEUE_FULL, QUEUE_EMPTY } Queue_status;
@@ -86,6 +87,7 @@ static void UARTManager_set_cur_buffer(Event const* const e)
            EVENT_CAST(e, SerialEvent)->buffer_size);
     uart_manager.char_ptr = uart_manager.cur_buffer;
     EVENT_HANDLED(e);
+    uart_manager.deferred_queue.events_loss = 0;
 }
 
 // ---------------------------------------------------------------------------------------------//
@@ -101,6 +103,10 @@ static State UARTManager_idle(UARTManager* me, Event const* const e)
     State state_stat;
     switch (e->sig) {
         case ENTRY_SIG: {
+            // Report missed events count
+            if (me->deferred_queue.events_loss) {
+                uart_send("UART events loss: %d\n\r", me->deferred_queue.events_loss);
+            }
             // Do we have deferred serial events to process?
             Event* evt_addr = (Event*)0;
             if (Queue_pop(&me->deferred_queue, &evt_addr) == QUEUE_SUCCESS) {
@@ -145,7 +151,12 @@ static State UARTManager_busy(UARTManager* me, Event const* const e)
         } break;
         case UART_SEND_SIG: {
             // Defer the serial event, it will be handled back in idle state
-            Queue_push(&me->deferred_queue, e);
+            Queue_status qstat = Queue_push(&me->deferred_queue, e);
+            if (qstat == QUEUE_FULL) {
+                // The queue is full, so we just release the event
+                EVENT_HANDLED(e);
+                (me->deferred_queue.events_loss)++;
+            }
             state_stat = HANDLED_STATUS;
         } break;
         default:
