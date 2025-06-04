@@ -2,7 +2,6 @@
 
 #include "i2c.h"
 #include <stdbool.h>
-#include <stdint.h>
 
 // ===============================================
 // Register Addresses, pg. 6
@@ -101,5 +100,5 @@ typedef struct {
 } mpu6050_data;
 
 void mpu6050_init(i2c_write_handler write_handler, i2c_read_handler read_handler);
-bool mpu6050_is_data_ready(void);
-void mpu6050_read_data(mpu6050_data* store);
+void mpu6050_get_data(uint8_t* data, Active* requester);
+void mpu6050_parse_data(uint8_t const* data, mpu6050_data* const store);

@@ -13,6 +13,7 @@ void ssd1309_128x64_init(u8g2_t* oled, i2c_write_handler write_handler)
     u8g2_Setup_ssd1309_i2c_128x64_noname0_f(oled, U8G2_R0, u8x8_i2c, u8x8_gpio_and_delay_i2c);
     u8g2_InitDisplay(oled);
     u8g2_SetPowerSave(oled, 0);
+    u8g2_SetFont(oled, u8g2_font_siji_t_6x10);
     u8g2_ClearDisplay(oled);
 }
 

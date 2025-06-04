@@ -1,26 +1,55 @@
 #include "mpu6050_i2c.h"
-#include "TM4C123GH6PM.h"
-#include "i2c.h"
-#include "printf/printf.h"
 #include <stdbool.h>
 #include <stdint.h>
 
 static i2c_write_handler i2c_write;
 static i2c_read_handler i2c_read;
 
+// #define INT_PIN (1U << 5)
+
+// void GPIOPortA_IRQHandler()
+// {
+//     uint32_t isrs_pins = GPIOA_AHB->MIS;
+//     GPIOA_AHB->ICR = 0xFFU; // Clear interrupt sources
+//
+//     // Only execute this when threadx is running
+//     TX_THREAD* thread_ptr;
+//     thread_ptr = tx_thread_identify();
+//     static const Event evt = {MPU6050_READ_SIG};
+//     if ((isrs_pins & INT_PIN) && (thread_ptr != TX_NULL)) {
+//         Active_post_nonthread(AO_Ship, &evt);
+//     }
+// }
+
 void mpu6050_init(i2c_write_handler write_handler, i2c_read_handler read_handler)
 {
     i2c_write = write_handler;
     i2c_read = read_handler;
 
+    /* // Assign interrupt pin
+    SYSCTL->RCGCGPIO |= (1U << 0);  // GPIOA
+    SYSCTL->GPIOHBCTL |= (1U << 0); // Enable High-Performance Bus Control
+    GPIOA_AHB->DIR &= ~INT_PIN;     // Configure as input
+    GPIOA_AHB->AFSEL &= ~INT_PIN;   // Configure as GPIO
+    GPIOA_AHB->PDR |= INT_PIN;      // Pull down register
+    GPIOA_AHB->DEN |= INT_PIN;      // Enable GPIO PIN
+    // Configure Interrupt, pg. 654
+    GPIOA_AHB->IS &= ~INT_PIN;  // Edge detect, pg. 664
+    GPIOA_AHB->IBE &= ~INT_PIN; // Only one edge detect interrupt, pg. 665
+    GPIOA_AHB->IEV |= INT_PIN;  // A rising edge triggers an interrupt, pg. 666
+    GPIOA_AHB->IM |= INT_PIN;   // Enable interrupt, pg. 667
+    // Enable interrupt
+    NVIC_SetPriority(GPIOA_IRQn, 7);
+    NVIC_EnableIRQ(GPIOA_IRQn); */
+
+    // Interrupt pin config, pg. 26, default Active high
+    // interrupt status bits are cleared on any read operation
+    uint8_t int_pin_cfg[2] = {INT_PIN_CFG, (1U << 4)};
+    (*i2c_write)(0x68, int_pin_cfg, 2);
+
     // Enable interrupt, pg. 27
     uint8_t int_enable[2] = {INT_ENABLE, 0x01};
     (*i2c_write)(0x68, int_enable, 2);
-
-    // Sanity check
-    uint8_t who_am_i = 0x00;
-    (*i2c_read)(0x68, WHO_AM_I, &who_am_i, 1);
-    printf_("I am MPU6050: %X\n\r", who_am_i);
 
     // Sample Rate Divider, pg. 12
     // With DLPG enabled, Sample Rate = 1000 / (1 + 9) = 100Hz
@@ -44,22 +73,13 @@ void mpu6050_init(i2c_write_handler write_handler, i2c_read_handler read_handler
     (*i2c_write)(0x68, pwr_mgmt_1, 2);
 }
 
-bool mpu6050_is_data_ready(void)
+void mpu6050_get_data(uint8_t* data, Active* requester)
 {
-    // Interrupt Status, pg. 28
-    // Reading this clear the interrupt bits when INT_RD_CLEAR bit in INT_PIN_CFG is 0
-    uint8_t int_status = 0x00;
-    (*i2c_read)(0x68, INT_STATUS, &int_status, 1);
-    return int_status & 0x01;
+    (*i2c_read)(0x68, ACCEL_XOUT_H, data, 14, requester);
 }
 
-void mpu6050_read_data(mpu6050_data* store)
+void mpu6050_parse_data(uint8_t const* data, mpu6050_data* const store)
 {
-    uint8_t data[sizeof(*store)] = {0};
-    if ((*i2c_read)(0x68, ACCEL_XOUT_H, &data[0], 14) & I2C_STATUS_ERROR) {
-        return;
-    }
-
     // get raw data
     int16_t accx_raw = (data[0] << 8) | data[1];
     int16_t accy_raw = (data[2] << 8) | data[3];
@@ -77,8 +97,4 @@ void mpu6050_read_data(mpu6050_data* store)
     store->gyrox = (float)gyrox_raw / 131;
     store->gyroy = (float)gyroy_raw / 131;
     store->gyroz = (float)gyroz_raw / 131;
-
-    // printf_("AccelX: %f, AccelY: %f, AccelZ: %f \n\r", store->accx, store->accy, store->accz);
-    // printf_("Temp: %f\n\r", store->temperature);
-    // printf_("GyroX: %f, GyroY: %f, GyroZ: %f \n\r", store->gyrox, store->gyroy, store->gyroz);
 }
