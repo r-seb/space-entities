@@ -79,3 +79,6 @@ extern Active* AO_I2CManager; // Global pointer so that others can post events t
 
 void UARTManager_ctor_call(void);
 extern Active* AO_UARTManager; // Global pointer so that others can post events to it
+
+void Ship_ctor_call(void);
+extern Active* AO_Ship; // Global pointer so that others can post events to it
