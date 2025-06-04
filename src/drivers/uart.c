@@ -128,10 +128,11 @@ int uart_send(const char* format, ...)
 
     // Flexible array members
     // https://developer.arm.com/documentation/dui0375/g/Compiler-Coding-Practices/Flexible-array-members-in-C99
-    uint32_t total_size = sizeof(SerialEvent) + buf_size;
+    uint32_t total_size = sizeof(SerialEvent) + buf_size + 1;
     SerialEvent* serial_evt;
-    // TODO: Find a way to indicate that the pool was full
-    if (EVENT_ALLOCATE_WITH_SIZE(uart_evt_byte_pool, serial_evt, total_size) == TX_SUCCESS) {
+    // NOTE: This call is not supported by an interrupt service routine, it returns TX_CALLER_ERROR
+    UINT status = EVENT_ALLOCATE_WITH_SIZE(uart_evt_byte_pool, serial_evt, total_size);
+    if (status == TX_SUCCESS) {
         serial_evt->super.sig = UART_SEND_SIG;
         // NOTE: String formatted using vsnprintf_ is automatically null-terminated so we also
         // include it, hence the +1
@@ -141,7 +142,8 @@ int uart_send(const char* format, ...)
         Active_post_nonthread(AO_UARTManager, (Event*)serial_evt);
         return buf_size;
     }
-    return 0;
+    // TODO: Find a way to indicate that the pool allocation was a failure
+    return status;
 }
 
 void uart_fill_fifo(char** c)
