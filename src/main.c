@@ -17,10 +17,10 @@ static void l_timer_tick_fn(ULONG id)
 
 /*
  * https://github.com/eclipse-threadx/rtos-docs/blob/main/rtos-docs/threadx/chapter4.md#tx_block_pool_create
- * Total number of blocks = 2840 / (512 + 4) = 5.50 = 5 blocks for 5 AO threads
+ * Total number of blocks = 3520 / (640 + 4) = 5.50 = 5 blocks for 5 AO threads
  */
-#define THREAD_STACK_SIZE 512U
-#define THREAD_BLOCK_POOL_SIZE 2840U
+#define THREAD_STACK_SIZE 640U
+#define THREAD_BLOCK_POOL_SIZE 3520U
 TX_BLOCK_POOL thread_block_pool;
 
 /*

@@ -69,8 +69,8 @@ static State Ship_flying(Ship* me, Event const* const e)
         case I2C_RECEIVE_DONE_SIG: {
             mpu6050_parse_data(me->imu_read_buffer, &me->imu_parsed_data);
             uart_send("%d\n\r", count++);
-            uart_send("Accx: %f\n\rAccy: %f\n\r", me->imu_parsed_data.accx,
-                      me->imu_parsed_data.accy);
+            uart_send("Accx: %f\n\rAccy: %f\n\rAccz: %f\n\r", me->imu_parsed_data.accx,
+                      me->imu_parsed_data.accy, me->imu_parsed_data.accz);
             state_stat = HANDLED_STATUS;
         } break;
         default:
