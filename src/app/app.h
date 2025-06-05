@@ -28,7 +28,6 @@ enum GameSignals {
 
 enum UartManagerSignals {
     UART_SEND_SIG = GAME_MAX_SIG,
-    UART_PROCESS_DEFERRED_SIG,
     UART_TRANSMITTED_SIG,
 
     UART_MAX_SIG

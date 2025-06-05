@@ -110,14 +110,9 @@ static State UARTManager_idle(UARTManager* me, Event const* const e)
             // Do we have deferred serial events to process?
             Event* evt_addr = (Event*)0;
             if (Queue_pop(&me->deferred_queue, &evt_addr) == QUEUE_SUCCESS) {
-                UARTManager_set_cur_buffer(evt_addr);
-                static Event const process_deferred_sig = {UART_PROCESS_DEFERRED_SIG};
-                Active_post_front(AO_UARTManager, &process_deferred_sig);
+                Active_post_front(AO_UARTManager, evt_addr);
             }
             state_stat = HANDLED_STATUS;
-        } break;
-        case UART_PROCESS_DEFERRED_SIG: {
-            state_stat = TRAN(&UARTManager_busy);
         } break;
         case UART_SEND_SIG: {
             UARTManager_set_cur_buffer(e);
