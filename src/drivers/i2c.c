@@ -79,13 +79,14 @@ void I2C1_IRQHandler()
 
     uint32_t mcs = I2C1->MCS;
 
-    static Event i2c_evt = {I2C_ERROR_SIG};
+    static Event i2c_evt;
+    i2c_evt.sig = I2C_ERROR_SIG;
     // BUSY
-    if ((mcs & (1U << 0)) != 0) {
+    if ((mcs & I2C_STATUS_BUSY) != 0) {
         led_toggle(LED_RED);
     }
-    // ARBLST or ERROR
-    else if ((mcs & (1U << 4)) || (mcs & (1U << 1))) {
+    // ARBLST or ADRACK or DATACK
+    else if ((mcs & (I2C_STATUS_ARBLST | I2C_STATUS_ADRACK | I2C_STATUS_DATACK)) != 0) {
         // TODO: Handle errata, I2C#07
         _cur_buffer = NULL;
         Active_post_front(AO_I2CManager, &i2c_evt);
