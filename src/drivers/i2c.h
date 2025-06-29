@@ -1,6 +1,7 @@
 #pragma once
 
 #include "active_object.h"
+#include <stdbool.h>
 #include <stdint.h>
 
 #define I2C_100Kbps 100000U
@@ -53,3 +54,9 @@ void i2c1_generate_stop(void);
 i2c_status_e i2c1_write(uint8_t slave_addr, uint8_t* buffer, uint8_t buf_size);
 i2c_status_e i2c1_read(uint8_t slave_addr, uint8_t reg_addr, uint8_t* store, uint8_t store_size,
                        Active* requester);
+bool i2c1_check_status(i2c_status_e status);
+void i2c1_deinit();
+void i2c1_init_bus_recovery();
+void i2c1_toggle_scl();
+void i2c1_set_scl_high();
+bool i2c1_check_sda();

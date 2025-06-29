@@ -88,6 +88,7 @@ void I2C1_IRQHandler()
     // ARBLST or ADRACK or DATACK
     else if ((mcs & (I2C_STATUS_ARBLST | I2C_STATUS_ADRACK | I2C_STATUS_DATACK)) != 0) {
         // TODO: Handle errata, I2C#07
+        i2c1_generate_stop();
         _cur_buffer = NULL;
         Active_post_front(AO_I2CManager, &i2c_evt);
     }
@@ -178,6 +179,67 @@ void i2c1_receive(i2c_data* data)
 void i2c1_generate_stop()
 {
     I2C1->MCS = I2C_STOP_OP;
+}
+
+bool i2c1_check_status(i2c_status_e status)
+{
+    return (I2C1->MCS & status);
+}
+
+void i2c1_deinit()
+{
+    // Disable the I2C clock using the RCGCI2C register
+    SYSCTL->RCGCI2C = (1U << 1); // I2C Module 1
+
+    // Disable the clock to the appropriate GPIO module via the RCGCGPIO register
+    // SYSCTL->RCGCGPIO &= ~(1U << 0);  // GPIOA
+    // SYSCTL->GPIOHBCTL &= ~(1U << 0); // Disable High-Performance Bus Control
+
+    // Disable the appropriate pins for their alternate function using the GPIOAFSEL register
+    GPIOA_AHB->DEN &= ~(SCL_PIN | SDA_PIN);
+    GPIOA_AHB->AFSEL &= ~(SCL_PIN | SDA_PIN);
+
+    // Disable the I2CSDA pin open-drain operation
+    GPIOA_AHB->ODR &= ~SDA_PIN;
+
+    // Remove the I2C signals to the appropriate pins. See page 688 and Table 23-5 on page 1351.
+    GPIOA_AHB->PCTL &= ~((3U << 24) | (3U << 28));
+
+    // Disable Master mode
+    I2C1->MCR &= ~(1U << 4);
+
+    // Disable interrupts
+    I2C1->MIMR &= ~(1U << 0); // Unset IM
+    NVIC_DisableIRQ(I2C1_IRQn);
+}
+
+void i2c1_init_bus_recovery()
+{
+    i2c1_deinit();
+
+    // use SCL as an Output and bit-bang it low/high until the slave releases SDA
+    GPIOA_AHB->DIR |= SCL_PIN;  // Configure as Output
+    GPIOA_AHB->ODR &= ~SCL_PIN; // Disable open-drain operation
+    GPIOA_AHB->DEN |= SCL_PIN;  // Enable GPIO PIN
+
+    // use SDA as an input to check if the pin is high/released from the slave
+    GPIOA_AHB->DIR &= ~SDA_PIN; // Configure as input
+    GPIOA_AHB->DEN |= SDA_PIN;  // Enable GPIO PIN
+}
+
+void i2c1_toggle_scl()
+{
+    GPIOA_AHB->DATA_Bits[SCL_PIN] ^= SCL_PIN;
+}
+
+void i2c1_set_scl_high()
+{
+    GPIOA_AHB->DATA_Bits[SCL_PIN] = SCL_PIN;
+}
+
+bool i2c1_check_sda()
+{
+    return GPIOA_AHB->DATA_Bits[SDA_PIN];
 }
 
 i2c_status_e i2c1_write(uint8_t slave_addr, uint8_t* buffer, uint8_t buf_size)
