@@ -1,5 +1,4 @@
 #include "ssd1309_128x64_i2c.h"
-#include "delay.h"
 #include "i2c.h"
 #include "u8g2.h"
 
@@ -14,6 +13,8 @@ void ssd1309_128x64_init(u8g2_t* oled, i2c_write_handler write_handler)
     u8g2_InitDisplay(oled);
     u8g2_SetPowerSave(oled, 0);
     u8g2_SetFont(oled, u8g2_font_siji_t_6x10);
+    u8g2_SetBitmapMode(oled, 1); // Make bitmap transparent
+    u8g2_SetContrast(oled, 0);
     u8g2_ClearDisplay(oled);
 }
 
@@ -21,7 +22,7 @@ uint8_t u8x8_gpio_and_delay_i2c(u8x8_t* u8x8, uint8_t msg, uint8_t arg_int, void
 {
     switch (msg) {
         case U8X8_MSG_DELAY_MILLI:
-            delay_ms(arg_int);
+            // delay_ms(arg_int);
             break;
     }
     return 1;
