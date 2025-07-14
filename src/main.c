@@ -52,7 +52,7 @@ void tx_application_define(void* first_unused_memory)
     UINT status;
 
     // Timer responsible for calling all active objects TimeEvent
-    status = tx_timer_create(&l_timer_tick, "timer tick", &l_timer_tick_fn, 0U, 20U, 20U,
+    status = tx_timer_create(&l_timer_tick, "timer tick", &l_timer_tick_fn, 0U, 16U, 16U,
                              TX_AUTO_ACTIVATE);
     ASSERT(status == TX_SUCCESS);
 

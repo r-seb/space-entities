@@ -57,8 +57,8 @@ static State Ship_flying(Ship* me, Event const* const e)
     State state_stat;
     switch (e->sig) {
         case ENTRY_SIG: {
-            // Post the TIME_OUT_SIG every 10Hz or 5*0.02ms
-            TimeEvent_arm(&me->time_event, 5U, 5U);
+            // Post the TIME_OUT_SIG every ~20.833Hz or 3*0.016ms
+            TimeEvent_arm(&me->time_event, 3U, 3U);
             state_stat = HANDLED_STATUS;
         } break;
         case TIME_TICK_SIG: {

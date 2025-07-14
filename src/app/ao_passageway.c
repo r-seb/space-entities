@@ -54,7 +54,7 @@ static State Passageway_playing(Passageway* me, Event const* const e)
     switch (e->sig) {
         case ENTRY_SIG: {
             // Post the TIME_OUT_SIG every 1 second
-            TimeEvent_arm(&me->time_event, 50U, 50U);
+            TimeEvent_arm(&me->time_event, 62U, 62U);
             state_stat = HANDLED_STATUS;
         } break;
         case TIME_TICK_SIG: {
