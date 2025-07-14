@@ -52,8 +52,7 @@ typedef struct {
     Event super;
 
     // public:
-    uint8_t x;
-    uint8_t y;
+    uint8_t move_cmd; // BITMASK. 0: UP, 1: DOWN, 2: LEFT, 3: RIGHT
 } PositionEvent;
 
 typedef struct {

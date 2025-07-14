@@ -5,6 +5,8 @@
 #include "state_machine.h"
 #include "uart.h"
 
+#define MOVE_THRES 0.015f
+
 typedef struct {
     Active super;
 
@@ -68,9 +70,26 @@ static State Ship_flying(Ship* me, Event const* const e)
         } break;
         case I2C_RECEIVE_DONE_SIG: {
             mpu6050_parse_data(me->imu_read_buffer, &me->imu_parsed_data);
-            uart_send("%d\n\r", count++);
-            uart_send("Accx: %f\n\rAccy: %f\n\rAccz: %f\n\r", me->imu_parsed_data.accx,
-                      me->imu_parsed_data.accy, me->imu_parsed_data.accz);
+            // uart_send("%d\n\r", count++);
+            // uart_send("Accx: %f\n\rAccy: %f\n\rAccz: %f\n\r", me->imu_parsed_data.accx,
+            //           me->imu_parsed_data.accy, me->imu_parsed_data.accz);
+            PositionEvent* pos_evt;
+            EVENT_ALLOCATE(msg_evt_byte_pool, pos_evt);
+            pos_evt->super.sig = SHIP_IMG_SIG;
+            pos_evt->move_cmd &= ~0xFF;
+            // UP-DOWN Movement
+            if (me->imu_parsed_data.accx > MOVE_THRES) {
+                pos_evt->move_cmd |= (1U << 0);
+            } else if (me->imu_parsed_data.accx < -MOVE_THRES) {
+                pos_evt->move_cmd |= (1U << 1);
+            }
+            // LEFT-RIGHT Movement
+            if (me->imu_parsed_data.accy > MOVE_THRES) {
+                pos_evt->move_cmd |= (1U << 2);
+            } else if (me->imu_parsed_data.accy < -MOVE_THRES) {
+                pos_evt->move_cmd |= (1U << 3);
+            }
+            Active_post(AO_Passageway, (Event*)pos_evt);
             state_stat = HANDLED_STATUS;
         } break;
         default:

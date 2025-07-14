@@ -37,6 +37,7 @@ static void Passageway_ctor(Passageway* const me)
 // State Machine
 static State Passageway_initial(Passageway* me, Event const* const e)
 {
+    uart_send("Passageway Initialized\n\r");
     return TRAN(&Passageway_playing);
 }
 
@@ -45,7 +46,6 @@ static State Passageway_playing(Passageway* me, Event const* const e)
     State state_stat;
     switch (e->sig) {
         case ENTRY_SIG: {
-            uart_send("Passageway Initialized\n\r");
             // Post the TIME_OUT_SIG every 1 second
             TimeEvent_arm(&me->time_event, 50U, 50U);
             state_stat = HANDLED_STATUS;
@@ -60,8 +60,7 @@ static State Passageway_playing(Passageway* me, Event const* const e)
             state_stat = HANDLED_STATUS;
         } break;
         case SHIP_IMG_SIG: {
-            uart_send("Mine PosX=%u, PosY=%u \n\r", EVENT_CAST(e, PositionEvent)->x,
-                      EVENT_CAST(e, PositionEvent)->y);
+            uart_send("Move CMD = %b\n\r", EVENT_CAST(e, PositionEvent)->move_cmd);
             EVENT_HANDLED(e);
             state_stat = HANDLED_STATUS;
         } break;
