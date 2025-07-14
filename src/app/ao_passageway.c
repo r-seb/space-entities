@@ -1,19 +1,20 @@
 #include "active_object.h"
 #include "app.h"
+#include "game/game.h"
 #include "i2c.h"
 #include "led.h"
 #include "ssd1309_128x64_i2c.h"
 #include "state_machine.h"
+#include "u8g2.h"
 #include "uart.h"
+
+static u8g2_t oled;
 
 typedef struct {
     Active super;
 
     // private:
     TimeEvent time_event;
-    uint8_t* mines[5];
-    uint8_t last_mine_x;
-    uint8_t last_mine_y;
 } Passageway;
 
 static Passageway passageway;
@@ -25,7 +26,10 @@ static State Passageway_initial(Passageway* me, Event const* const e);
 static State Passageway_playing(Passageway* me, Event const* const e);
 static State Passageway_game_over(Passageway* me, Event const* const e);
 
-void Passageway_ctor_call() { Passageway_ctor(&passageway); } // To be called by main
+void Passageway_ctor_call()
+{
+    Passageway_ctor(&passageway);
+} // To be called by main
 
 static void Passageway_ctor(Passageway* const me)
 {
@@ -38,9 +42,12 @@ static void Passageway_ctor(Passageway* const me)
 static State Passageway_initial(Passageway* me, Event const* const e)
 {
     uart_send("Passageway Initialized\n\r");
+    ssd1309_128x64_init(&oled, &i2c1_write);
+    game_init();
     return TRAN(&Passageway_playing);
 }
 
+static bool init = false;
 static State Passageway_playing(Passageway* me, Event const* const e)
 {
     State state_stat;
@@ -51,12 +58,16 @@ static State Passageway_playing(Passageway* me, Event const* const e)
             state_stat = HANDLED_STATUS;
         } break;
         case TIME_TICK_SIG: {
-            //uart_send("TICK-TOCK");
+            if (init) {
+                game_system_move();
+                game_system_draw(&oled);
+                game_system_animate();
+            }
             state_stat = HANDLED_STATUS;
-            Passageway_move(me);
         } break;
         case TIME_OUT_SIG: {
             led_toggle(LED_BLUE);
+            init = true;
             state_stat = HANDLED_STATUS;
         } break;
         case SHIP_IMG_SIG: {

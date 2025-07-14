@@ -56,9 +56,9 @@
                                     <listOptionValue value="${PROJECT_ROOT}/external/threadx/ports/cortex_m4/gnu/inc"/>
                                     <listOptionValue value="${PROJECT_ROOT}/external/threadx/common/inc"/>
                                     <listOptionValue value="${PROJECT_ROOT}/external/u8g2/csrc"/>
-                                    <listOptionValue value="${PROJECT_ROOT}/src/app"/>
                                     <listOptionValue value="${PROJECT_ROOT}/src/drivers"/>
                                     <listOptionValue value="${PROJECT_ROOT}/src/common"/>
+                                    <listOptionValue value="${PROJECT_ROOT}/src/app"/>
                                 </option>
                                 <option id="com.ti.ccstudio.buildDefinitions.TMS470_GNU_10.0.compilerID.OPT_LEVEL.329225339" superClass="com.ti.ccstudio.buildDefinitions.TMS470_GNU_10.0.compilerID.OPT_LEVEL" value="com.ti.ccstudio.buildDefinitions.TMS470_GNU_10.0.compilerID.OPT_LEVEL.OPT_FOR_DEBUG" valueType="enumerated"/>
                                 <option id="com.ti.ccstudio.buildDefinitions.TMS470_GNU_10.0.compilerID.DEBUG.1806016964" superClass="com.ti.ccstudio.buildDefinitions.TMS470_GNU_10.0.compilerID.DEBUG" value="true" valueType="boolean"/>
@@ -71,6 +71,7 @@
                                 <option id="com.ti.ccstudio.buildDefinitions.TMS470_GNU_10.0.compilerID.ASM_SPECIFIC_FLAGS.197295050" superClass="com.ti.ccstudio.buildDefinitions.TMS470_GNU_10.0.compilerID.ASM_SPECIFIC_FLAGS" valueType="stringList">
                                     <listOptionValue value="[asm: -xassembler-with-cpp]"/>
                                 </option>
+                                <option id="com.ti.ccstudio.buildDefinitions.TMS470_GNU_10.0.compilerID.STD_C.529479330" superClass="com.ti.ccstudio.buildDefinitions.TMS470_GNU_10.0.compilerID.STD_C" value="com.ti.ccstudio.buildDefinitions.TMS470_GNU_10.0.compilerID.STD_C.C99" valueType="enumerated"/>
                             </tool>
                             <tool id="com.ti.ccstudio.buildDefinitions.TMS470_GNU_10.0.exe.linkerDebug.624407011" name="GNU Linker" superClass="com.ti.ccstudio.buildDefinitions.TMS470_GNU_10.0.exe.linkerDebug">
                                 <option id="com.ti.ccstudio.buildDefinitions.TMS470_GNU_10.0.linkerID.OUTPUT_FILE.2078154469" superClass="com.ti.ccstudio.buildDefinitions.TMS470_GNU_10.0.linkerID.OUTPUT_FILE" value="${ProjName}.out" valueType="string"/>
