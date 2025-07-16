@@ -32,6 +32,7 @@ typedef enum {
     VELOCITY_COMP_ID,
     HEALTH_COMP_ID,
     SPRITE_COMP_ID,
+    STATE_COMP_ID,
 
     COMP_ID_MAX
 } ecs_component_id_t;

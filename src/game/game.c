@@ -20,6 +20,10 @@ static ecs_entity_t sprite_comp_sparse[MAX_ENTITIES];
 static ecs_entity_t sprite_comp_dense[MAX_ENTITIES];
 static sprite_comp_t sprite_comp_data[MAX_ENTITIES];
 
+static ecs_entity_t state_comp_sparse[MAX_ENTITIES];
+static ecs_entity_t state_comp_dense[MAX_ENTITIES];
+static state_comp_t state_comp_data[MAX_ENTITIES];
+
 static ecs_entity_t entities_sparse[MAX_ENTITIES];
 static ecs_entity_t entities_dense[MAX_ENTITIES];
 
@@ -48,6 +52,11 @@ void game_init()
     ecs.components[SPRITE_COMP_ID].set.dense = sprite_comp_dense;
     ecs.components[SPRITE_COMP_ID].data = sprite_comp_data;
     ecs.components[SPRITE_COMP_ID].data_size = sizeof(sprite_comp_t);
+    // State
+    ecs.components[STATE_COMP_ID].set.sparse = state_comp_sparse;
+    ecs.components[STATE_COMP_ID].set.dense = state_comp_dense;
+    ecs.components[STATE_COMP_ID].data = state_comp_data;
+    ecs.components[STATE_COMP_ID].data_size = sizeof(state_comp_t);
 
     // Entities
     ecs.entities.sparse = entities_sparse;

@@ -42,7 +42,7 @@ ecs_entity_t ecs_get_entity_tag(ecs_world_t* ecs, ecs_entity_t entity)
         return entity_get_tag(ecs->entities.dense[dense_idx]);
     }
 
-    return UINT16_MAX;
+    return 0;
 }
 
 ecs_entity_t ecs_get_entity_id(ecs_entity_t entity)

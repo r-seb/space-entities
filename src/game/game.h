@@ -1,5 +1,6 @@
 #pragma once
 
+#include "game/ecs.h"
 #include "state_machine.h"
 #include "u8g2.h"
 
@@ -35,6 +36,8 @@ typedef struct {
 
 typedef struct {
     Hsm super;
+    ecs_world_t* ecs;
+    ecs_entity_t entity;
 } state_comp_t;
 
 void game_init();
