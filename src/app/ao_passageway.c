@@ -70,8 +70,8 @@ static State Passageway_playing(Passageway* me, Event const* const e)
             init = true;
             state_stat = HANDLED_STATUS;
         } break;
-        case SHIP_IMG_SIG: {
-            uart_send("Move CMD = %b\n\r", EVENT_CAST(e, PositionEvent)->move_cmd);
+        case SHIP_MOVE_SIG: {
+            game_system_input(e);
             EVENT_HANDLED(e);
             state_stat = HANDLED_STATUS;
         } break;

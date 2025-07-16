@@ -75,7 +75,7 @@ static State Ship_flying(Ship* me, Event const* const e)
             //           me->imu_parsed_data.accy, me->imu_parsed_data.accz);
             PositionEvent* pos_evt;
             EVENT_ALLOCATE(msg_evt_byte_pool, pos_evt);
-            pos_evt->super.sig = SHIP_IMG_SIG;
+            pos_evt->super.sig = SHIP_MOVE_SIG;
             pos_evt->move_cmd &= ~0xFF;
             // UP-DOWN Movement
             if (me->imu_parsed_data.accx > MOVE_THRES) {

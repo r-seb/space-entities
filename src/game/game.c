@@ -1,6 +1,7 @@
 #include "game/game.h"
 #include "game/assets.h"
 #include "game/ecs.h"
+#include "state_machine.h"
 
 static ecs_component_t components[COMP_ID_MAX];
 
@@ -102,6 +103,11 @@ void game_init()
                               .height = CRAWLER_BMP_FRAME_HEIGHT};
     ecs_add_component(&ecs, crawler1_ent, SPRITE_COMP_ID, &sprite);
     ecs_add_component(&ecs, crawler2_ent, SPRITE_COMP_ID, &sprite);
+
+    // Initialize all state machines
+    state_comp_t sm = (state_comp_t) {.ecs = &ecs, .entity = player_ent};
+    sm_player_ctor_call(&sm);
+    ecs_add_component(&ecs, player_ent, STATE_COMP_ID, &sm);
 }
 
 void game_system_move()
@@ -111,9 +117,20 @@ void game_system_move()
         position_comp_t* pos = ECS_GET_COMP_FROM_IDX(&ecs, POSITION_COMP_ID, idx, position_comp_t);
         ecs_entity_t ent = ecs.components[POSITION_COMP_ID].set.dense[idx];
         velocity_comp_t* vel = ECS_GET_COMP_FROM_ENT(&ecs, VELOCITY_COMP_ID, ent, velocity_comp_t);
+        sprite_comp_t* sp = ECS_GET_COMP_FROM_ENT(&ecs, SPRITE_COMP_ID, ent, sprite_comp_t);
 
         pos->x += vel->dx;
         pos->y += vel->dy;
+
+        // Player is bounded by the screen
+        if (ecs_get_entity_tag(&ecs, ent) & PLAYER_TAG) {
+            if (pos->x > (OLED_WIDTH - sp->width) || pos->x < 0.f) {
+                pos->x -= vel->dx;
+            }
+            if (pos->y > (OLED_HEIGHT - sp->height) || pos->y < 0.f) {
+                pos->y -= vel->dy;
+            }
+        }
     }
 }
 
@@ -146,6 +163,20 @@ void game_system_animate()
                 sp->frame_idx = (sp->frame_idx + 1) % sp->frame_count;
                 sp->frame_time = 0.f;
             }
+        }
+    }
+}
+
+void game_system_input(Event const* const e)
+{
+    uint8_t component_count = ecs.components[VELOCITY_COMP_ID].set.count;
+    for (int idx = 0; idx < component_count; ++idx) {
+        ecs_entity_t ent = ecs.components[VELOCITY_COMP_ID].set.dense[idx];
+        state_comp_t* sm = ECS_GET_COMP_FROM_ENT(&ecs, STATE_COMP_ID, ent, state_comp_t);
+
+        if (ecs_get_entity_tag(&ecs, ent) & PLAYER_TAG) {
+            Hsm_dispatch(&sm->super, e);
+            break;
         }
     }
 }

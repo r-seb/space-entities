@@ -15,13 +15,7 @@ extern TX_BYTE_POOL uart_evt_byte_pool;
 enum GameSignals {
     TIME_TICK_SIG = USER_SIG,
     TIME_OUT_SIG,
-    MINE_IMG_SIG,
-    SHIP_IMG_SIG,
-
-    PLAYER_SHIP_UP_SIG,
-    PLAYER_SHIP_DOWN_SIG,
-    PLAYER_SHIP_LEFT_SIG,
-    PLAYER_SHIP_RIGHT_SIG,
+    SHIP_MOVE_SIG,
 
     GAME_MAX_SIG
 };
