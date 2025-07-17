@@ -63,10 +63,10 @@ void game_init()
     ecs.entities.sparse = entities_sparse;
     ecs.entities.dense = entities_dense;
 
-    ecs_entity_t player_ent = ecs_create_entity(&ecs, (PLAYER_TAG | ANIMATE_TAG));
-    ecs_entity_t cauldron_ent = ecs_create_entity(&ecs, (ENEMY_TAG | ANIMATE_TAG));
-    ecs_entity_t crawler1_ent = ecs_create_entity(&ecs, (ENEMY_TAG | ANIMATE_TAG));
-    ecs_entity_t crawler2_ent = ecs_create_entity(&ecs, (ENEMY_TAG | ANIMATE_TAG));
+    ecs_entity_t player_ent = ecs_create_entity(&ecs, (PLAYER_TAG));
+    ecs_entity_t cauldron_ent = ecs_create_entity(&ecs, (ENEMY_TAG));
+    ecs_entity_t crawler1_ent = ecs_create_entity(&ecs, (ENEMY_TAG));
+    ecs_entity_t crawler2_ent = ecs_create_entity(&ecs, (ENEMY_TAG));
 
     position_comp_t pos = {.x = 30.f, .y = 28.f};
     ecs_add_component(&ecs, player_ent, POSITION_COMP_ID, &pos);
@@ -143,6 +143,11 @@ void game_system_draw(u8g2_t* oled)
         ecs_entity_t ent = ecs.components[POSITION_COMP_ID].set.dense[idx];
         position_comp_t* pos = ECS_GET_COMP_FROM_ENT(&ecs, POSITION_COMP_ID, ent, position_comp_t);
 
+        // Draw starts --> +---------+
+        //  from here      |         |
+        //                 |   BMP   |
+        //                 |         |
+        //                 +---------+
         u8g2_DrawXBM(oled, pos->x, pos->y, sp->width, sp->height,
                      &sp->sprites[sp->frame_idx * sp->frame_size]);
     }
@@ -154,9 +159,8 @@ void game_system_animate()
     uint8_t component_count = ecs.components[SPRITE_COMP_ID].set.count;
     for (int idx = 0; idx < component_count; ++idx) {
         sprite_comp_t* sp = ECS_GET_COMP_FROM_IDX(&ecs, SPRITE_COMP_ID, idx, sprite_comp_t);
-        ecs_entity_t ent = ecs.components[SPRITE_COMP_ID].set.dense[idx];
 
-        if (ecs_get_entity_tag(&ecs, ent) & ANIMATE_TAG) {
+        if (sp->frame_count > 1) {
             sp->frame_time += DELTA_TIME_S;
 
             if (sp->frame_time > ANIMATE_TIME_S) {

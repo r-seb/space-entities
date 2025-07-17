@@ -43,7 +43,6 @@ typedef enum {
     BULLET_TAG = (1U << 1),
     ENEMY_TAG = (1U << 2),
     OBSTACLE_TAG = (1U << 3),
-    ANIMATE_TAG = (1U << 4),
 
     DEAD_TAG = (1U << 7) // Max value
 } ecs_entity_tag_t;
