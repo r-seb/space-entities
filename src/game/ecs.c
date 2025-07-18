@@ -30,9 +30,9 @@ bool ecs_is_entity_alive(ecs_world_t* ecs, ecs_entity_t entity)
     return entity_get_version(ecs->entities.sparse[id]) == version;
 }
 
-ecs_entity_t ecs_get_entity_version(ecs_entity_t entity)
+ecs_entity_t ecs_get_entity_version(ecs_world_t* ecs, ecs_entity_t entity)
 {
-    return entity_get_version(entity);
+    return entity_get_version(ecs->entities.sparse[entity_get_id(entity)]);
 }
 
 ecs_entity_t ecs_get_entity_tag(ecs_world_t* ecs, ecs_entity_t entity)
