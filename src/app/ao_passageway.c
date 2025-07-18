@@ -60,6 +60,7 @@ static State Passageway_playing(Passageway* me, Event const* const e)
         case TIME_TICK_SIG: {
             if (init) {
                 game_system_move();
+                game_system_keep_in_boundary();
                 game_system_draw(&oled);
                 game_system_animate();
             }

@@ -63,7 +63,7 @@ void game_init()
     ecs.entities.sparse = entities_sparse;
     ecs.entities.dense = entities_dense;
 
-    ecs_entity_t player_ent = ecs_create_entity(&ecs, (PLAYER_TAG));
+    ecs_entity_t player_ent = ecs_create_entity(&ecs, (PLAYER_TAG | KEEP_BOUNDED_TAG));
     ecs_entity_t cauldron_ent = ecs_create_entity(&ecs, (ENEMY_TAG));
     ecs_entity_t crawler1_ent = ecs_create_entity(&ecs, (ENEMY_TAG));
     ecs_entity_t crawler2_ent = ecs_create_entity(&ecs, (ENEMY_TAG));
@@ -117,19 +117,34 @@ void game_system_move()
         position_comp_t* pos = ECS_GET_COMP_FROM_IDX(&ecs, POSITION_COMP_ID, idx, position_comp_t);
         ecs_entity_t ent = ecs.components[POSITION_COMP_ID].set.dense[idx];
         velocity_comp_t* vel = ECS_GET_COMP_FROM_ENT(&ecs, VELOCITY_COMP_ID, ent, velocity_comp_t);
-        sprite_comp_t* sp = ECS_GET_COMP_FROM_ENT(&ecs, SPRITE_COMP_ID, ent, sprite_comp_t);
 
         pos->x += vel->dx;
         pos->y += vel->dy;
+    }
+}
 
-        // Player is bounded by the screen
-        if (ecs_get_entity_tag(&ecs, ent) & PLAYER_TAG) {
-            if (pos->x > (OLED_WIDTH - sp->width) || pos->x < 0.f) {
-                pos->x -= vel->dx;
+void game_system_keep_in_boundary()
+{
+    uint8_t component_count = ecs.components[POSITION_COMP_ID].set.count;
+    for (int idx = 0; idx < component_count; ++idx) {
+        position_comp_t* pos = ECS_GET_COMP_FROM_IDX(&ecs, POSITION_COMP_ID, idx, position_comp_t);
+        ecs_entity_t ent = ecs.components[POSITION_COMP_ID].set.dense[idx];
+        sprite_comp_t* sp = ECS_GET_COMP_FROM_ENT(&ecs, SPRITE_COMP_ID, ent, sprite_comp_t);
+
+        if (ecs_get_entity_tag(&ecs, ent) & KEEP_BOUNDED_TAG) {
+            if (pos->x < 0.f) {
+                pos->x = 0;
+            } else if (pos->x > (OLED_WIDTH - sp->width)) {
+                pos->x = OLED_WIDTH - sp->width;
             }
-            if (pos->y > (OLED_HEIGHT - sp->height) || pos->y < 0.f) {
-                pos->y -= vel->dy;
+
+            if (pos->y < 0.f) {
+                pos->y = 0;
+            } else if (pos->y > (OLED_HEIGHT - sp->height)) {
+                pos->y = OLED_HEIGHT - sp->height;
             }
+
+            // TODO: Hsm_dispatch BOUND_REACHED_SIG
         }
     }
 }

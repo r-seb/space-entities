@@ -42,6 +42,7 @@ typedef struct {
 
 void game_init();
 void game_system_move();
+void game_system_keep_in_boundary();
 void game_system_draw(u8g2_t* oled);
 void game_system_animate();
 void game_system_input(Event const* const e); // BITMASK. 3: RIGHT, 2: LEFT, 1: DOWN, 0: UP
