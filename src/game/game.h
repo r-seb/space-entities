@@ -46,6 +46,8 @@ void game_system_keep_in_boundary();
 void game_system_draw(u8g2_t* oled);
 void game_system_animate();
 void game_system_input(Event const* const e); // BITMASK. 3: RIGHT, 2: LEFT, 1: DOWN, 0: UP
+void game_system_collision_check();
+
 // ---------------------------------------------------------------------------------------------//
 // Entity State Machines
 void sm_player_ctor_call(state_comp_t* sm_instance);

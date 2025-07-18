@@ -199,3 +199,96 @@ void game_system_input(Event const* const e)
         }
     }
 }
+
+void game_system_collision_check()
+{
+    uint8_t component_count = ecs.components[POSITION_COMP_ID].set.count;
+    for (int i = 0; i < component_count; ++i) {
+        position_comp_t* pos_a = ECS_GET_COMP_FROM_IDX(&ecs, POSITION_COMP_ID, i, position_comp_t);
+        ecs_entity_t ent_a = ecs.components[POSITION_COMP_ID].set.dense[i];
+        sprite_comp_t* sp = ECS_GET_COMP_FROM_ENT(&ecs, SPRITE_COMP_ID, ent_a, sprite_comp_t);
+        velocity_comp_t* vel_a =
+            ECS_GET_COMP_FROM_ENT(&ecs, VELOCITY_COMP_ID, ent_a, velocity_comp_t);
+
+        // NOTE: OBSTACLE_TAG doesn't need collision check since it's not destroyable
+        ecs_entity_t tag_a = ecs_get_entity_tag(&ecs, ent_a);
+        if (tag_a & OBSTACLE_TAG) {
+            continue;
+        }
+
+        float reca_top_left_x = pos_a->x;
+        float reca_top_left_y = pos_a->y;
+        float reca_bot_right_x = pos_a->x + sp->width;
+        float reca_bot_right_y = pos_a->y + sp->height;
+
+        for (int j = 0; j < component_count; ++j) {
+            position_comp_t* pos_b =
+                ECS_GET_COMP_FROM_IDX(&ecs, POSITION_COMP_ID, j, position_comp_t);
+            ecs_entity_t ent_b = ecs.components[POSITION_COMP_ID].set.dense[j];
+            sp = ECS_GET_COMP_FROM_ENT(&ecs, SPRITE_COMP_ID, ent_b, sprite_comp_t);
+
+            // Checks to skip, X = YES, O = NO
+            // TAGS a\b |   PLAYER  ENEMY   BULLET  OBSTACLE
+            // ---------+-----------------------------------
+            // PLAYER   |     X       O       X        O
+            // ENEMY    |     X       X       O        X
+            // BULLET   |     X       O       X        O
+            ecs_entity_t tag_b = ecs_get_entity_tag(&ecs, ent_b);
+            if (ent_a == ent_b || (tag_a & PLAYER_TAG && tag_b & BULLET_TAG) ||
+                (tag_a & ENEMY_TAG && (tag_b & OBSTACLE_TAG || tag_b & ENEMY_TAG)) ||
+                (tag_a & ENEMY_TAG && (tag_b & PLAYER_TAG && tag_b & INVINCIBLE_TAG)) ||
+                (tag_a & BULLET_TAG && (tag_b & PLAYER_TAG || tag_b & BULLET_TAG))) {
+                continue;
+            }
+
+            float recb_top_left_x = pos_b->x;
+            float recb_top_left_y = pos_b->y;
+            float recb_bot_right_x = pos_b->x + sp->width;
+            float recb_bot_right_y = pos_b->y + sp->height;
+
+            // Check collision, AABB method
+            // +---------+
+            // |         |
+            // |    A +--|------+
+            // |      |//|      |
+            // +------|--+ B    |
+            //        |         |
+            //        +---------+
+            bool collided = (reca_top_left_x <= recb_bot_right_x) &&
+                (reca_bot_right_x >= recb_top_left_x) && (reca_top_left_y <= recb_bot_right_y) &&
+                (reca_bot_right_y >= recb_top_left_y);
+            if (collided) {
+                ecs.entities.dense[ecs.entities.sparse[ecs_get_entity_id(ent_a)]] |= COLLIDED_TAG;
+
+                // Compute the overlap on each axis
+                float overlap_x =
+                    (reca_bot_right_x - recb_top_left_x < recb_bot_right_x - reca_top_left_x)
+                    ? (reca_bot_right_x - recb_top_left_x)
+                    : (recb_bot_right_x - reca_top_left_x);
+                float overlap_y =
+                    (reca_bot_right_y - recb_top_left_y < recb_bot_right_y - reca_top_left_y)
+                    ? (reca_bot_right_y - recb_top_left_y)
+                    : (recb_bot_right_y - reca_top_left_y);
+
+                // Resolve on the axis with the least overlap
+                // This somewhat prevents collided objects from phasing through each other but it
+                // probably doesn't prevent tunneling, maybe try the swept AABB method?
+                if (overlap_y < overlap_x) {
+                    // Resolve along y axis
+                    if (vel_a->dy > 0.f) {
+                        pos_a->y -= overlap_y;
+                    } else if (vel_a->dy < 0.f) {
+                        pos_a->y += overlap_y;
+                    }
+                } else {
+                    // Resolve along x axis
+                    if (vel_a->dx > 0.f) {
+                        pos_a->x -= overlap_x;
+                    } else if (vel_a->dx < 0.f) {
+                        pos_a->x += overlap_x;
+                    }
+                }
+            }
+        }
+    }
+}
