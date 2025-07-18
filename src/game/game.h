@@ -22,6 +22,7 @@ typedef struct {
 
 typedef struct {
     const uint8_t* sprites;
+    float animate_time_s;
     float frame_time;
     uint8_t frame_size;
     uint8_t frame_idx;

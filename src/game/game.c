@@ -85,18 +85,21 @@ void game_init()
     ecs_add_component(&ecs, crawler2_ent, VELOCITY_COMP_ID, &vel);
 
     sprite_comp_t sprite = {.sprites = player_ship_bmp,
+                            .animate_time_s = ANIMATE_TIME_S,
                             .frame_size = PLAYER_SHIP_BMP_FRAME_SIZE,
                             .frame_count = PLAYER_SHIP_BMP_FRAME_COUNT,
                             .width = PLAYER_SHIP_BMP_FRAME_WIDTH,
                             .height = PLAYER_SHIP_BMP_FRAME_HEIGHT};
     ecs_add_component(&ecs, player_ent, SPRITE_COMP_ID, &sprite);
     sprite = (sprite_comp_t) {.sprites = cauldron_bmp,
+                              .animate_time_s = ANIMATE_TIME_S,
                               .frame_size = CAULDRON_BMP_FRAME_SIZE,
                               .frame_count = CAULDRON_BMP_FRAME_COUNT,
                               .width = CAULDRON_BMP_FRAME_WIDTH,
                               .height = CAULDRON_BMP_FRAME_HEIGHT};
     ecs_add_component(&ecs, cauldron_ent, SPRITE_COMP_ID, &sprite);
     sprite = (sprite_comp_t) {.sprites = crawler_bmp,
+                              .animate_time_s = ANIMATE_TIME_S,
                               .frame_size = CRAWLER_BMP_FRAME_SIZE,
                               .frame_count = CRAWLER_BMP_FRAME_COUNT,
                               .width = CRAWLER_BMP_FRAME_WIDTH,
@@ -178,7 +181,7 @@ void game_system_animate()
         if (sp->frame_count > 1) {
             sp->frame_time += DELTA_TIME_S;
 
-            if (sp->frame_time > ANIMATE_TIME_S) {
+            if (sp->frame_time > sp->animate_time_s) {
                 sp->frame_idx = (sp->frame_idx + 1) % sp->frame_count;
                 sp->frame_time = 0.f;
             }
