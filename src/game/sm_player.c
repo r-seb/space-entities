@@ -8,6 +8,9 @@ static State sm_player_initial(state_comp_t* const me, Event const* const e);
 static State sm_player_flying(state_comp_t* const me, Event const* const e);
 static State sm_player_exploding(state_comp_t* const me, Event const* const e);
 
+// Private Variables
+static float _invicible_time_s;
+
 // To be called by main
 void sm_player_ctor_call(state_comp_t* sm_instance)
 {
@@ -29,6 +32,18 @@ static State sm_player_flying(state_comp_t* const me, Event const* const e)
     State state_stat;
     switch (e->sig) {
         case ENTRY_SIG: {
+            state_stat = HANDLED_STATUS;
+        } break;
+        case TIME_TICK_SIG: {
+            if (_invicible_time_s > 0) {
+                _invicible_time_s -= DELTA_TIME_S;
+            } else {
+                _invicible_time_s = 0;
+                sprite_comp_t* sp =
+                    ECS_GET_COMP_FROM_ENT(me->ecs, SPRITE_COMP_ID, me->entity, sprite_comp_t);
+                sp->frame_count = 3;
+                ecs_unset_entity_tag(me->ecs, me->entity, INVINCIBLE_TAG);
+            }
             state_stat = HANDLED_STATUS;
         } break;
         case SHIP_MOVE_SIG: {
@@ -54,6 +69,17 @@ static State sm_player_flying(state_comp_t* const me, Event const* const e)
                 vel->dx = 1.f;
             } else {
                 vel->dx = 0.f;
+            }
+            state_stat = HANDLED_STATUS;
+        } break;
+        case COLLIDED_SIG: {
+            // TODO: Decrease health
+            if (_invicible_time_s == 0) {
+                sprite_comp_t* sp =
+                    ECS_GET_COMP_FROM_ENT(me->ecs, SPRITE_COMP_ID, me->entity, sprite_comp_t);
+                sp->frame_count = 4;
+                _invicible_time_s = 1.0f;
+                ecs_set_entity_tag(me->ecs, me->entity, INVINCIBLE_TAG);
             }
             state_stat = HANDLED_STATUS;
         } break;

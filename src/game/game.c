@@ -1,4 +1,5 @@
 #include "game/game.h"
+#include "app.h"
 #include "game/assets.h"
 #include "game/ecs.h"
 #include "state_machine.h"
@@ -223,9 +224,9 @@ void game_system_collision_check()
         velocity_comp_t* vel_a =
             ECS_GET_COMP_FROM_ENT(&ecs, VELOCITY_COMP_ID, ent_a, velocity_comp_t);
 
-        // NOTE: OBSTACLE_TAG doesn't need collision check since it's not destroyable
+        // NOTE: Tags that doesn't need collision check since it's not destroyable
         ecs_entity_t tag_a = ecs_get_entity_tag(&ecs, ent_a);
-        if (tag_a & OBSTACLE_TAG) {
+        if (tag_a & (OBSTACLE_TAG | INVINCIBLE_TAG)) {
             continue;
         }
 
@@ -302,6 +303,21 @@ void game_system_collision_check()
                     }
                 }
             }
+        }
+    }
+}
+
+void game_system_collision_resolution()
+{
+    uint8_t sm_count = ecs.components[STATE_COMP_ID].set.count;
+    for (int idx = 0; idx < sm_count; ++idx) {
+        state_comp_t* sm = ECS_GET_COMP_FROM_IDX(&ecs, STATE_COMP_ID, idx, state_comp_t);
+        ecs_entity_t ent = ecs.components[STATE_COMP_ID].set.dense[idx];
+
+        if (ecs_get_entity_tag(&ecs, ent) & COLLIDED_TAG) {
+            ecs_unset_entity_tag(&ecs, ent, COLLIDED_TAG);
+            static const Event collided_evt = {COLLIDED_SIG};
+            Hsm_dispatch(&sm->super, &collided_evt);
         }
     }
 }

@@ -65,6 +65,7 @@ static State Passageway_playing(Passageway* me, Event const* const e)
                 game_system_draw(&oled);
                 game_system_animate();
                 game_system_collision_check();
+                game_system_collision_resolution();
             }
             state_stat = HANDLED_STATUS;
         } break;

@@ -16,6 +16,7 @@ enum GameSignals {
     TIME_TICK_SIG = USER_SIG,
     TIME_OUT_SIG,
     SHIP_MOVE_SIG,
+    COLLIDED_SIG,
 
     GAME_MAX_SIG
 };
