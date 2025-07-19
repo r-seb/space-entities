@@ -261,7 +261,7 @@ void game_system_collision_check()
                 (reca_bot_right_x >= recb_top_left_x) && (reca_top_left_y <= recb_bot_right_y) &&
                 (reca_bot_right_y >= recb_top_left_y);
             if (collided) {
-                ecs.entities.dense[ecs.entities.sparse[ecs_get_entity_id(ent_a)]] |= COLLIDED_TAG;
+                ecs_set_entity_tag(&ecs, ent_a, COLLIDED_TAG);
 
                 // Compute the overlap on each axis
                 float overlap_x =

@@ -50,6 +50,18 @@ ecs_entity_t ecs_get_entity_id(ecs_entity_t entity)
     return entity_get_id(entity);
 }
 
+ecs_entity_t ecs_set_entity_tag(ecs_world_t* ecs, ecs_entity_t entity, ecs_entity_tag_t tag)
+{
+    uint8_t dense_idx = entity_get_dense_idx(ecs->entities.sparse[ecs_get_entity_id(entity)]);
+    return ecs->entities.dense[dense_idx] |= tag;
+}
+
+ecs_entity_t ecs_unset_entity_tag(ecs_world_t* ecs, ecs_entity_t entity, ecs_entity_tag_t tag)
+{
+    uint8_t dense_idx = entity_get_dense_idx(ecs->entities.sparse[ecs_get_entity_id(entity)]);
+    return ecs->entities.dense[dense_idx] &= ~tag;
+}
+
 // https://bitsquid.blogspot.com/2014/08/building-data-oriented-entity-system.html
 // https://ajmmertens.medium.com/doing-a-lot-with-a-little-ecs-identifiers-25a72bd2647
 ecs_entity_t ecs_create_entity(ecs_world_t* ecs, uint8_t tag)

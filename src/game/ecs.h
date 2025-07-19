@@ -81,6 +81,8 @@ bool ecs_is_entity_alive(ecs_world_t* ecs, ecs_entity_t entity);
 ecs_entity_t ecs_get_entity_version(ecs_world_t* ecs, ecs_entity_t entity);
 ecs_entity_t ecs_get_entity_tag(ecs_world_t* ecs, ecs_entity_t entity);
 ecs_entity_t ecs_get_entity_id(ecs_entity_t entity);
+ecs_entity_t ecs_set_entity_tag(ecs_world_t* ecs, ecs_entity_t entity, ecs_entity_tag_t tag);
+ecs_entity_t ecs_unset_entity_tag(ecs_world_t* ecs, ecs_entity_t entity, ecs_entity_tag_t tag);
 ecs_entity_t ecs_create_entity(ecs_world_t* ecs, uint8_t tag);
 bool ecs_delete_entity(ecs_world_t* ecs, ecs_entity_t entity);
 void ecs_register_component(ecs_world_t* ecs, ecs_component_id_t comp_id, size_t component_size);
