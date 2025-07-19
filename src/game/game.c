@@ -177,7 +177,8 @@ void game_system_draw(u8g2_t* oled)
         //                 |   BMP   |
         //                 |         |
         //                 +---------+
-        u8g2_DrawXBM(oled, pos->x, pos->y, sp->width, sp->height,
+        // HACK: Cast to signed int to support drawing bitmaps offscreen at coordinates < 0
+        u8g2_DrawXBM(oled, (int16_t)pos->x, (int16_t)pos->y, sp->width, sp->height,
                      &sp->sprites[sp->frame_idx * sp->frame_size]);
     }
     u8g2_SendBuffer(oled);
