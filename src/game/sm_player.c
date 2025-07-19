@@ -79,6 +79,28 @@ static State sm_player_flying(state_comp_t* const me, Event const* const e)
             }
             state_stat = HANDLED_STATUS;
         } break;
+        case BOUND_REACHED_SIG: {
+            position_comp_t* pos =
+                ECS_GET_COMP_FROM_ENT(me->ecs, POSITION_COMP_ID, me->entity, position_comp_t);
+            sprite_comp_t* sp =
+                ECS_GET_COMP_FROM_ENT(me->ecs, SPRITE_COMP_ID, me->entity, sprite_comp_t);
+            uint8_t bounds = EVENT_CAST(e, BoundEvent)->bound_bitmask;
+
+            // X-Axis
+            if (bounds & LEFT_BOUND_REACHED) {
+                pos->x = 0.f;
+            } else if (bounds & RIGHT_BOUND_REACHED) {
+                pos->x = OLED_WIDTH - sp->width;
+            }
+
+            // Y-Axis
+            if (bounds & TOP_BOUND_REACHED) {
+                pos->y = 0.f;
+            } else if (bounds & BOTTOM_BOUND_REACHED) {
+                pos->y = OLED_HEIGHT - sp->height;
+            }
+            state_stat = HANDLED_STATUS;
+        } break;
         case EXIT_SIG: {
             state_stat = HANDLED_STATUS;
         } break;

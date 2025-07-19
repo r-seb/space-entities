@@ -144,21 +144,23 @@ void game_system_keep_in_boundary()
         position_comp_t* pos = ECS_GET_COMP_FROM_IDX(&ecs, POSITION_COMP_ID, idx, position_comp_t);
         ecs_entity_t ent = ecs.components[POSITION_COMP_ID].set.dense[idx];
         sprite_comp_t* sp = ECS_GET_COMP_FROM_ENT(&ecs, SPRITE_COMP_ID, ent, sprite_comp_t);
+        state_comp_t* sm = ECS_GET_COMP_FROM_ENT(&ecs, STATE_COMP_ID, ent, state_comp_t);
 
+        BoundEvent bound_evt = {.super = {BOUND_REACHED_SIG}, .bound_bitmask = 0};
         if (ecs_get_entity_tag(&ecs, ent) & KEEP_BOUNDED_TAG) {
             if (pos->x < 0.f) {
-                pos->x = 0;
+                bound_evt.bound_bitmask |= LEFT_BOUND_REACHED;
             } else if (pos->x > (OLED_WIDTH - sp->width)) {
-                pos->x = OLED_WIDTH - sp->width;
+                bound_evt.bound_bitmask |= RIGHT_BOUND_REACHED;
             }
 
             if (pos->y < 0.f) {
-                pos->y = 0;
+                bound_evt.bound_bitmask |= TOP_BOUND_REACHED;
             } else if (pos->y > (OLED_HEIGHT - sp->height)) {
-                pos->y = OLED_HEIGHT - sp->height;
+                bound_evt.bound_bitmask |= BOTTOM_BOUND_REACHED;
             }
 
-            // TODO: Hsm_dispatch BOUND_REACHED_SIG
+            Hsm_dispatch(&sm->super, (Event*)&bound_evt);
         }
     }
 }

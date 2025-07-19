@@ -17,6 +17,7 @@ enum GameSignals {
     TIME_OUT_SIG,
     SHIP_MOVE_SIG,
     COLLIDED_SIG,
+    BOUND_REACHED_SIG,
 
     GAME_MAX_SIG
 };
@@ -52,6 +53,16 @@ typedef struct {
                       // bit1: down_cmd
                       // bit0: up_cmd
 } PositionEvent;
+
+typedef struct {
+    Event super;
+
+    // public:
+    uint8_t bound_bitmask; // bit3: right_bound_reached
+                           // bit2: left_bound_reached
+                           // bit1: bottom_bound_reached
+                           // bit0: top_bound_reached
+} BoundEvent;
 
 typedef struct {
     Event super;

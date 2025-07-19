@@ -14,6 +14,11 @@
 #define MOVE_LEFT_CMD (1U << 2)
 #define MOVE_RIGHT_CMD (1U << 3)
 
+#define TOP_BOUND_REACHED (1U << 0)
+#define BOTTOM_BOUND_REACHED (1U << 1)
+#define LEFT_BOUND_REACHED (1U << 2)
+#define RIGHT_BOUND_REACHED (1U << 3)
+
 typedef struct {
     float x;
     float y;
@@ -52,7 +57,7 @@ void game_system_move();
 void game_system_keep_in_boundary();
 void game_system_draw(u8g2_t* oled);
 void game_system_animate();
-void game_system_input(Event const* const e); // BITMASK. 3: RIGHT, 2: LEFT, 1: DOWN, 0: UP
+void game_system_input(Event const* const e);
 void game_system_collision_check();
 void game_system_collision_resolution();
 
