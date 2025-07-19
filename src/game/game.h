@@ -9,6 +9,11 @@
 #define OLED_WIDTH 128
 #define OLED_HEIGHT 64
 
+#define MOVE_UP_CMD (1U << 0)
+#define MOVE_DOWN_CMD (1U << 1)
+#define MOVE_LEFT_CMD (1U << 2)
+#define MOVE_RIGHT_CMD (1U << 3)
+
 typedef struct {
     float x;
     float y;

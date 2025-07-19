@@ -50,22 +50,18 @@ static State sm_player_flying(state_comp_t* const me, Event const* const e)
             uint8_t cmd = EVENT_CAST(e, PositionEvent)->move_cmd;
             velocity_comp_t* vel =
                 ECS_GET_COMP_FROM_ENT(me->ecs, VELOCITY_COMP_ID, me->entity, velocity_comp_t);
-            // UP
-            if (cmd & (1U << 0)) {
+
+            if (cmd & MOVE_UP_CMD) {
                 vel->dy = -1.f;
-            }
-            // DOWN
-            else if (cmd & (1U << 1)) {
+            } else if (cmd & MOVE_DOWN_CMD) {
                 vel->dy = 1.f;
             } else {
                 vel->dy = 0.f;
             }
-            // LEFT
-            if (cmd & (1U << 2)) {
+
+            if (cmd & MOVE_LEFT_CMD) {
                 vel->dx = -1.f;
-            }
-            // RIGHT
-            else if (cmd & (1U << 3)) {
+            } else if (cmd & MOVE_RIGHT_CMD) {
                 vel->dx = 1.f;
             } else {
                 vel->dx = 0.f;
