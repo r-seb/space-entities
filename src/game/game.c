@@ -113,6 +113,16 @@ void game_init()
     ecs_add_component(&ecs, player_ent, STATE_COMP_ID, &sm);
 }
 
+void game_system_tick(const Event* const e)
+{
+    uint8_t sm_count = ecs.components[STATE_COMP_ID].set.count;
+    for (int idx = 0; idx < sm_count; ++idx) {
+        state_comp_t* sm = ECS_GET_COMP_FROM_IDX(&ecs, STATE_COMP_ID, idx, state_comp_t);
+        // Dispatch system tick to every entities with state machine
+        Hsm_dispatch(&sm->super, e);
+    }
+}
+
 void game_system_move()
 {
     uint8_t component_count = ecs.components[POSITION_COMP_ID].set.count;

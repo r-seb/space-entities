@@ -42,6 +42,7 @@ typedef struct {
 } state_comp_t;
 
 void game_init();
+void game_system_tick(const Event* const e);
 void game_system_move();
 void game_system_keep_in_boundary();
 void game_system_draw(u8g2_t* oled);
