@@ -2,30 +2,29 @@
 #include "game/ecs.h"
 #include "game/game.h"
 #include "state_machine.h"
-#include "uart.h"
 
 // Function prototypes
-static void sm_mine_ctor(state_comp_t* const me);
-static State sm_mine_initial(state_comp_t* const me, Event const* const e);
-static State sm_mine_drifting(state_comp_t* const me, Event const* const e);
+static void sm_player_bullet_ctor(state_comp_t* const me);
+static State sm_player_bullet_initial(state_comp_t* const me, Event const* const e);
+static State sm_player_bullet_drifting(state_comp_t* const me, Event const* const e);
 
 // To be called by main
-void sm_mine_ctor_call(state_comp_t* sm_instance)
+void sm_player_bullet_ctor_call(state_comp_t* sm_instance)
 {
-    sm_mine_ctor(sm_instance);
+    sm_player_bullet_ctor(sm_instance);
 }
 
-static void sm_mine_ctor(state_comp_t* const me)
+static void sm_player_bullet_ctor(state_comp_t* const me)
 {
-    Hsm_ctor(&me->super, (StateHandler)&sm_mine_initial);
+    Hsm_ctor(&me->super, (StateHandler)&sm_player_bullet_initial);
 }
 
-static State sm_mine_initial(state_comp_t* me, Event const* const e)
+static State sm_player_bullet_initial(state_comp_t* me, Event const* const e)
 {
-    return TRAN(&sm_mine_drifting);
+    return TRAN(&sm_player_bullet_drifting);
 }
 
-static State sm_mine_drifting(state_comp_t* const me, Event const* const e)
+static State sm_player_bullet_drifting(state_comp_t* const me, Event const* const e)
 {
     State state_stat;
     switch (e->sig) {
@@ -38,7 +37,6 @@ static State sm_mine_drifting(state_comp_t* const me, Event const* const e)
             if ((pos->x < 0.f) || (pos->x > (OLED_WIDTH - sp->width)) || (pos->y < 0.f) ||
                 (pos->y > (OLED_HEIGHT - sp->height))) {
                 ecs_set_entity_tag(me->ecs, me->entity, DEAD_TAG);
-                // uart_send("Entity %u marked DEAD\n\r", me->entity >> ENTITY_BITSHIFT);
             }
 
             state_stat = HANDLED_STATUS;

@@ -17,6 +17,15 @@
 #define PLAYER_SHIP_BMP_FRAME_HEIGHT 8U
 extern const uint8_t player_ship_bmp[];
 
+// 3x2     3x2
+// . X X   X X .
+// X X .   . X X
+#define PLAYER_BULLET_BMP_FRAME_SIZE 2U
+#define PLAYER_BULLET_BMP_FRAME_COUNT 2U
+#define PLAYER_BULLET_BMP_FRAME_WIDTH 3U
+#define PLAYER_BULLET_BMP_FRAME_HEIGHT 2U
+extern const uint8_t player_bullet_bmp[];
+
 // 12x13
 // . . . . X X X . . . . .
 // . . . X X X X X X X X .

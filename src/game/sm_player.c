@@ -1,6 +1,10 @@
 #include "app.h"
+#include "assets.h"
 #include "game/game.h"
 #include "state_machine.h"
+
+#define SHOOT_INTERVAL_S 0.3f
+#define INVINCIBLE_INTERVAL_S 3.f
 
 // Function prototypes
 static void sm_player_ctor(state_comp_t* const me);
@@ -10,6 +14,7 @@ static State sm_player_exploding(state_comp_t* const me, Event const* const e);
 
 // Private Variables
 static float _invicible_time_s;
+static float _shooting_interval_s;
 
 // To be called by main
 void sm_player_ctor_call(state_comp_t* sm_instance)
@@ -35,7 +40,7 @@ static State sm_player_flying(state_comp_t* const me, Event const* const e)
             state_stat = HANDLED_STATUS;
         } break;
         case TIME_TICK_SIG: {
-            if (_invicible_time_s > 0) {
+            if (_invicible_time_s > 0.f) {
                 _invicible_time_s -= DELTA_TIME_S;
             } else {
                 _invicible_time_s = 0;
@@ -43,6 +48,39 @@ static State sm_player_flying(state_comp_t* const me, Event const* const e)
                     ECS_GET_COMP_FROM_ENT(me->ecs, SPRITE_COMP_ID, me->entity, sprite_comp_t);
                 sp->frame_count = 3;
                 ecs_unset_entity_tag(me->ecs, me->entity, INVINCIBLE_TAG);
+            }
+
+            _shooting_interval_s -= DELTA_TIME_S;
+            if (_shooting_interval_s <= 0.f) {
+                ecs_entity_t bullet_ent = ecs_create_entity(me->ecs, BULLET_TAG);
+                if (bullet_ent != UINT16_MAX) {
+                    // Sprite component
+                    sprite_comp_t sp = {.sprites = player_bullet_bmp,
+                                        .animate_time_s = ANIMATE_TIME_S,
+                                        .frame_size = PLAYER_BULLET_BMP_FRAME_SIZE,
+                                        .frame_count = PLAYER_BULLET_BMP_FRAME_COUNT,
+                                        .width = PLAYER_BULLET_BMP_FRAME_WIDTH,
+                                        .height = PLAYER_BULLET_BMP_FRAME_HEIGHT};
+                    ecs_add_component(me->ecs, bullet_ent, SPRITE_COMP_ID, &sp);
+
+                    // State Machine component
+                    state_comp_t sm = (state_comp_t) {.ecs = me->ecs, .entity = bullet_ent};
+                    sm_player_bullet_ctor_call(&sm);
+                    ecs_add_component(me->ecs, sm.entity, STATE_COMP_ID, &sm);
+
+                    position_comp_t* player_pos = ECS_GET_COMP_FROM_ENT(
+                        me->ecs, POSITION_COMP_ID, me->entity, position_comp_t);
+                    // Position component
+                    position_comp_t pos = {.x = player_pos->x + sp.width + 4,
+                                           .y = player_pos->y + sp.height + 1};
+                    ecs_add_component(me->ecs, bullet_ent, POSITION_COMP_ID, &pos);
+
+                    // Velocity component
+                    velocity_comp_t vel = {.dx = 1.0f, .dy = 0.f};
+                    ecs_add_component(me->ecs, bullet_ent, VELOCITY_COMP_ID, &vel);
+
+                    _shooting_interval_s = SHOOT_INTERVAL_S;
+                }
             }
             state_stat = HANDLED_STATUS;
         } break;
@@ -70,11 +108,11 @@ static State sm_player_flying(state_comp_t* const me, Event const* const e)
         } break;
         case COLLIDED_SIG: {
             // TODO: Decrease health
-            if (_invicible_time_s == 0) {
+            if (_invicible_time_s <= 0.f) {
                 sprite_comp_t* sp =
                     ECS_GET_COMP_FROM_ENT(me->ecs, SPRITE_COMP_ID, me->entity, sprite_comp_t);
                 sp->frame_count = 4;
-                _invicible_time_s = 1.0f;
+                _invicible_time_s = INVINCIBLE_INTERVAL_S;
                 ecs_set_entity_tag(me->ecs, me->entity, INVINCIBLE_TAG);
             }
             state_stat = HANDLED_STATUS;

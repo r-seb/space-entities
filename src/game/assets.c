@@ -19,6 +19,15 @@ const uint8_t player_ship_bmp[] = {
     // Frame 3, empty bitmap
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
+// 3x2     3x2
+// . X X   X X .
+// X X .   . X X
+const uint8_t player_bullet_bmp[] = {
+    // frame 0
+    0x06, 0x03,
+    // frame 1
+    0x03, 0x06};
+
 // 12x13
 // . . . . X X X . . . . .
 // . . . X X X X X X X X .
