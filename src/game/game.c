@@ -112,7 +112,10 @@ void game_init()
     // Initialize all state machines
     state_comp_t sm = (state_comp_t) {.ecs = &ecs, .entity = player_ent};
     sm_player_ctor_call(&sm);
-    ecs_add_component(&ecs, player_ent, STATE_COMP_ID, &sm);
+    ecs_add_component(&ecs, sm.entity, STATE_COMP_ID, &sm);
+    sm = (state_comp_t) {.ecs = &ecs, .entity = cauldron_ent};
+    sm_cauldron_ctor_call(&sm);
+    ecs_add_component(&ecs, sm.entity, STATE_COMP_ID, &sm);
 }
 
 void game_system_tick(const Event* const e)
