@@ -66,6 +66,9 @@ ecs_entity_t ecs_unset_entity_tag(ecs_world_t* ecs, ecs_entity_t entity, ecs_ent
 // https://ajmmertens.medium.com/doing-a-lot-with-a-little-ecs-identifiers-25a72bd2647
 ecs_entity_t ecs_create_entity(ecs_world_t* ecs, uint8_t tag)
 {
+    if (ecs->entities.count >= MAX_ENTITIES) {
+        return UINT16_MAX;
+    }
     // find or create entity
     uint8_t dense_idx = ecs->entities.count;
     uint8_t id = dense_idx; // if recycle_entity_count == 0
@@ -247,7 +250,7 @@ bool ecs_remove_component(ecs_world_t* ecs, ecs_entity_t entity, ecs_component_i
     }
 
     uint8_t last_data_idx = --(ecs->components[comp_id].set.count);
-    uint8_t last_id = entity_get_id(ecs->entities.dense[last_data_idx]);
+    uint8_t last_id = entity_get_id(ecs->components[comp_id].set.dense[last_data_idx]);
     uint8_t id = entity_get_id(entity);
     uint8_t data_idx = ecs->components[comp_id].set.sparse[id];
     uint8_t data_size = ecs->components[comp_id].data_size;
