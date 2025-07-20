@@ -81,15 +81,15 @@ void tx_application_define(void* first_unused_memory)
     Active_start(AO_I2CManager, 0, &thread_block_pool, THREAD_STACK_SIZE, &stack_ptr,
                  &msg_evt_byte_pool, MSG_QUEUE_SIZE, &queue_ptr);
 
-    Passageway_ctor_call();
-    Active_start(AO_Passageway, 1, &thread_block_pool, THREAD_STACK_SIZE, &stack_ptr,
-                 &msg_evt_byte_pool, MSG_QUEUE_SIZE, &queue_ptr);
-
     Ship_ctor_call();
     Active_start(AO_Ship, 2, &thread_block_pool, THREAD_STACK_SIZE, &stack_ptr, &msg_evt_byte_pool,
                  MSG_QUEUE_SIZE, &queue_ptr);
 
     UARTManager_ctor_call();
     Active_start(AO_UARTManager, 5, &thread_block_pool, THREAD_STACK_SIZE, &stack_ptr,
+                 &msg_evt_byte_pool, MSG_QUEUE_SIZE, &queue_ptr);
+
+    Passageway_ctor_call();
+    Active_start(AO_Passageway, 1, &thread_block_pool, THREAD_STACK_SIZE * 2U, &stack_ptr,
                  &msg_evt_byte_pool, MSG_QUEUE_SIZE, &queue_ptr);
 }
