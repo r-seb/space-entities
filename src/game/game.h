@@ -60,6 +60,7 @@ void game_system_animate();
 void game_system_input(Event const* const e);
 void game_system_collision_check();
 void game_system_collision_resolution();
+void game_system_remove_dead_entities();
 
 // ---------------------------------------------------------------------------------------------//
 // Entity State Machines

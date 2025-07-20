@@ -3,6 +3,7 @@
 #include "game/assets.h"
 #include "game/ecs.h"
 #include "state_machine.h"
+#include "uart.h"
 
 static ecs_component_t components[COMP_ID_MAX];
 
@@ -322,5 +323,33 @@ void game_system_collision_resolution()
             static const Event collided_evt = {COLLIDED_SIG};
             Hsm_dispatch(&sm->super, &collided_evt);
         }
+    }
+}
+
+void game_system_remove_dead_entities()
+{
+    ecs_entity_t dead_entities[MAX_ENTITIES] = {0};
+    uint8_t dead_count = 0;
+
+    // Find Entities with DEAD_TAG
+    uint8_t ent_count = ecs.entities.count;
+    for (int idx = 0; idx < ent_count; ++idx) {
+        // NOTE: Reading from dense gives entity_id|tag
+        ecs_entity_t ent = ecs.entities.dense[idx];
+        uint8_t tag = ent & ENTITY_BITMASK;
+
+        if (tag & DEAD_TAG) {
+            // NOTE: For deletion need to pass entity_id|version
+            ent &= ~ENTITY_BITMASK;
+            ent |= ecs_get_entity_version(&ecs, ent);
+            dead_entities[dead_count] = ent;
+            dead_count++;
+        }
+    }
+
+    // Bulk delete Entities with DEAD_TAG
+    for (int idx = 0; idx < dead_count; ++idx) {
+        ecs_delete_entity(&ecs, dead_entities[idx]);
+        // uart_send("Entity %u Deleted\n\r", dead_entities[idx] >> ENTITY_BITSHIFT);
     }
 }
