@@ -171,9 +171,15 @@ void game_system_keep_in_boundary()
 
 void game_system_draw(u8g2_t* oled)
 {
-    uint8_t component_count = ecs.components[SPRITE_COMP_ID].set.count;
     u8g2_ClearBuffer(oled);
-    for (int idx = 0; idx < component_count; ++idx) {
+
+    char str[15];
+    uint8_t ent_count = ecs.entities.count;
+    snprintf_(str, sizeof(str), "Entities: %u", ent_count);
+    u8g2_DrawStr(oled, 0, 10, str);
+
+    uint8_t sp_count = ecs.components[SPRITE_COMP_ID].set.count;
+    for (int idx = 0; idx < sp_count; ++idx) {
         sprite_comp_t* sp = ECS_GET_COMP_FROM_IDX(&ecs, SPRITE_COMP_ID, idx, sprite_comp_t);
         ecs_entity_t ent = ecs.components[POSITION_COMP_ID].set.dense[idx];
         position_comp_t* pos = ECS_GET_COMP_FROM_ENT(&ecs, POSITION_COMP_ID, ent, position_comp_t);
@@ -187,6 +193,7 @@ void game_system_draw(u8g2_t* oled)
         u8g2_DrawXBM(oled, (int16_t)pos->x, (int16_t)pos->y, sp->width, sp->height,
                      &sp->sprites[sp->frame_idx * sp->frame_size]);
     }
+
     u8g2_SendBuffer(oled);
 }
 
