@@ -54,7 +54,7 @@ static State sm_cauldron_shooting(state_comp_t* const me, Event const* const e)
 
                     // State Machine component
                     state_comp_t sm = (state_comp_t) {.ecs = me->ecs, .entity = mine_ent};
-                    sm_mine_ctor_call(&sm);
+                    sm_glyph_ctor_call(&sm);
                     ecs_add_component(me->ecs, sm.entity, STATE_COMP_ID, &sm);
 
                     position_comp_t* cauldron_pos = ECS_GET_COMP_FROM_ENT(

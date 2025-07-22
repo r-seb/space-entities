@@ -234,3 +234,28 @@ extern const uint8_t cat_glyph_bmp[];
 // . X . . . . X .   . X . . . . X .
 // . X X X X X X .   . X X X X X X .
 extern const uint8_t demon_glyph_bmp[];
+
+// 8x8               8x8               8x8               8x8               8x8
+// . . . . . . . .   . X X . . X X .   . . . . . . . .   . . . . . . . .   . . . . . . . .
+// . . X . . X . .   X . . . . . . X   . . X . . X . .   . . . . . . . .   . . . . . . . .
+// . X . X X . X .   X . X . . X . X   . X . X X . X .   . . X . . X . .   . . . . . . . .
+// . . X . . X . .   . . . X X . . .   . . X . . X . .   . . . X X . . .   . . . X . . . .
+// . . X . . X . .   . . . X X . . .   . . X . . X . .   . . . X X . . .   . . . . X . . .
+// . X . X X . X .   X . X . . X . X   . X . X X . X .   . . X . . X . .   . . . . . . . .
+// . . X . . X . .   X . . . . . . X   . . X . . X . .   . . . . . . . .   . . . . . . . .
+// . . . . . . . .   . X X . . X X .   . . . . . . . .   . . . . . . . .   . . . . . . . .
+//
+// 8x8
+// . . . . . . . .
+// . . . . . . . .
+// . . . . . . . .
+// . . . . X . . .
+// . . . X . . . .
+// . . . . . . . .
+// . . . . . . . .
+// . . . . . . . .
+#define GLYPH_EXPLODED_BMP_FRAME_SIZE 8U
+#define GLYPH_EXPLODED_BMP_FRAME_COUNT 6U
+#define GLYPH_EXPLODED_BMP_FRAME_WIDTH 8U
+#define GLYPH_EXPLODED_BMP_FRAME_HEIGHT 8U
+extern const uint8_t glyph_exploded_bmp[];

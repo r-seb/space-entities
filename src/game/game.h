@@ -68,5 +68,5 @@ void game_system_remove_dead_entities();
 void sm_player_ctor_call(state_comp_t* sm_instance);
 void sm_player_bullet_ctor_call(state_comp_t* sm_instance);
 void sm_cauldron_ctor_call(state_comp_t* sm_instance);
-void sm_mine_ctor_call(state_comp_t* sm_instance);
+void sm_glyph_ctor_call(state_comp_t* sm_instance);
 void sm_asteroid_ctor_call(state_comp_t* sm_instance);

@@ -1,5 +1,4 @@
 #include "app.h"
-#include "game/assets.h"
 #include "game/ecs.h"
 #include "game/game.h"
 #include "state_machine.h"
@@ -34,18 +33,12 @@ static State sm_asteroid_drifting(state_comp_t* const me, Event const* const e)
                 ECS_GET_COMP_FROM_ENT(me->ecs, POSITION_COMP_ID, me->entity, position_comp_t);
             sprite_comp_t* sp =
                 ECS_GET_COMP_FROM_ENT(me->ecs, SPRITE_COMP_ID, me->entity, sprite_comp_t);
-            velocity_comp_t* vel =
-                ECS_GET_COMP_FROM_ENT(me->ecs, VELOCITY_COMP_ID, me->entity, velocity_comp_t);
 
             if ((pos->x < -sp->width) || (pos->x > (OLED_WIDTH + sp->width)) ||
                 (pos->y < -sp->height) || (pos->y > (OLED_HEIGHT + sp->height))) {
                 ecs_set_entity_tag(me->ecs, me->entity, DEAD_TAG);
             }
 
-            state_stat = HANDLED_STATUS;
-        } break;
-        case COLLIDED_SIG: {
-            ecs_set_entity_tag(me->ecs, me->entity, DEAD_TAG);
             state_stat = HANDLED_STATUS;
         } break;
         default:

@@ -140,17 +140,20 @@ void game_system_tick(const Event* const e)
 
 void game_system_spawn_random_entities()
 {
-    static float asteroid_spawn_interval_s = 0.f;
+    static float entity_spawn_interval_s = 0.f;
 
     uint8_t ent_type = simplerandom_cong_next(&rng_cong) % 10;
 
-    asteroid_spawn_interval_s -= DELTA_TIME_S;
-    if (asteroid_spawn_interval_s <= 0.f) {
+    entity_spawn_interval_s -= DELTA_TIME_S;
+    if (entity_spawn_interval_s <= 0.f) {
         ecs_entity_t random_ent = ecs_create_entity(&ecs, OBSTACLE_TAG | ENEMY_TAG);
         if (random_ent != UINT16_MAX) {
+            // State Machine component
+            state_comp_t sm = (state_comp_t) {.ecs = &ecs, .entity = random_ent};
             // Sprite component
             sprite_comp_t sp = {0};
             if (ent_type <= 3) {
+                sm_glyph_ctor_call(&sm);
                 ecs_unset_entity_tag(&ecs, random_ent, OBSTACLE_TAG);
                 const uint8_t* glyphs[] = {alien_glyph_bmp, ghost_glyph_bmp, cat_glyph_bmp,
                                            demon_glyph_bmp};
@@ -161,6 +164,7 @@ void game_system_spawn_random_entities()
                 sp.width = GLYPH_BMP_FRAME_WIDTH;
                 sp.height = GLYPH_BMP_FRAME_HEIGHT;
             } else if (ent_type >= 4 && ent_type <= 6) {
+                sm_asteroid_ctor_call(&sm);
                 ecs_unset_entity_tag(&ecs, random_ent, ENEMY_TAG);
                 sp.sprites = asteroid_small_bmp;
                 sp.animate_time_s = ANIMATE_TIME_S;
@@ -169,6 +173,7 @@ void game_system_spawn_random_entities()
                 sp.width = ASTEROID_SMALL_BMP_FRAME_WIDTH;
                 sp.height = ASTEROID_SMALL_BMP_FRAME_HEIGHT;
             } else {
+                sm_asteroid_ctor_call(&sm);
                 ecs_unset_entity_tag(&ecs, random_ent, ENEMY_TAG);
                 sp.sprites = asteroid_big_bmp;
                 sp.animate_time_s = ANIMATE_TIME_S;
@@ -177,12 +182,8 @@ void game_system_spawn_random_entities()
                 sp.width = ASTEROID_BIG_BMP_FRAME_WIDTH;
                 sp.height = ASTEROID_BIG_BMP_FRAME_HEIGHT;
             }
-            ecs_add_component(&ecs, random_ent, SPRITE_COMP_ID, &sp);
-
-            // State Machine component
-            state_comp_t sm = (state_comp_t) {.ecs = &ecs, .entity = random_ent};
-            sm_asteroid_ctor_call(&sm);
             ecs_add_component(&ecs, sm.entity, STATE_COMP_ID, &sm);
+            ecs_add_component(&ecs, random_ent, SPRITE_COMP_ID, &sp);
 
             // Position component
             position_comp_t pos = {0};
@@ -197,7 +198,7 @@ void game_system_spawn_random_entities()
             ecs_add_component(&ecs, random_ent, VELOCITY_COMP_ID, &vel);
         }
 
-        asteroid_spawn_interval_s = SPAWN_INTERVAL_S;
+        entity_spawn_interval_s = SPAWN_INTERVAL_S;
     }
 }
 
