@@ -245,14 +245,18 @@ bool ecs_add_component(ecs_world_t* ecs, ecs_entity_t entity, ecs_component_id_t
 
 bool ecs_remove_component(ecs_world_t* ecs, ecs_entity_t entity, ecs_component_id_t comp_id)
 {
-    if (ecs->components[comp_id].set.count == 0 || !ecs_is_entity_alive(ecs, entity)) {
+    uint8_t id = entity_get_id(entity);
+    uint8_t data_idx = ecs->components[comp_id].set.sparse[id];
+
+    // Ensure that the entity_id is present on the list
+    bool id_match = (id == entity_get_id(ecs->components[comp_id].set.dense[data_idx]));
+
+    if (ecs->components[comp_id].set.count == 0 || !ecs_is_entity_alive(ecs, entity) || !id_match) {
         return false;
     }
 
     uint8_t last_data_idx = --(ecs->components[comp_id].set.count);
     uint8_t last_id = entity_get_id(ecs->components[comp_id].set.dense[last_data_idx]);
-    uint8_t id = entity_get_id(entity);
-    uint8_t data_idx = ecs->components[comp_id].set.sparse[id];
     uint8_t data_size = ecs->components[comp_id].data_size;
 
     /* Store last element at the deleted index
