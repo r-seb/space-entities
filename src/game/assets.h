@@ -185,3 +185,52 @@ extern const uint8_t asteroid_big_bmp[];
 #define ASTEROID_SMALL_BMP_FRAME_WIDTH 7U
 #define ASTEROID_SMALL_BMP_FRAME_HEIGHT 6U
 extern const uint8_t asteroid_small_bmp[];
+
+#define GLYPH_BMP_FRAME_SIZE 8U
+#define GLYPH_BMP_FRAME_COUNT 2U
+#define GLYPH_BMP_FRAME_WIDTH 8U
+#define GLYPH_BMP_FRAME_HEIGHT 8U
+
+// 8x8               8x8
+// . X . . . . X .   . . X . . X . .
+// . . X . . X . .   . . X . . X . .
+// . X X X X X X .   . X X X X X X .
+// . X . X X . X .   . X . X X . X .
+// X X X X X X X X   X X X . . X X X
+// X . X . . X . X   X . X . . X . X
+// . . X X X X . .   . . X X X X . .
+// . . X . . X . .   . . X . . X . .
+extern const uint8_t alien_glyph_bmp[];
+
+// 8x8               8x8
+// . . X X X . . .   . . X X X . . .
+// . X . . . X . .   . X X X X X . .
+// X . X . X . X .   X X . X . X X .
+// X . X . X . X .   X X . X . X X .
+// X . . . . . X .   X X X X X X X .
+// X . . . . . X .   X X X X X X X .
+// X X . X . X X .   X X X X X X X .
+// X . X . X . X .   X . X . X . X .
+extern const uint8_t ghost_glyph_bmp[];
+
+// 8x8               8x8
+// X . . . . . . X   . . . . . . . .
+// X X . . . . X X   X X . . . . X X
+// X . X X X X . X   X . X X X X . X
+// X X X X X X X X   X X X X X X X X
+// X . . X X . . X   X x x X X x x X
+// X X X X X X X X   X X X X X X X X
+// . X X X X X X .   . X X X X X X .
+// X . X X X X . X   . . X X X X . .
+extern const uint8_t cat_glyph_bmp[];
+
+// 8x8               8x8
+// X . . . . . . X   X . . . . . . X
+// X . . . . . . X   X . . . . . . X
+// X X X X X X X X   X X X X X X X X
+// . X . X X . X .   . X . X X . X .
+// X X . X X . X X   X X X X X X X X
+// X X X X X X X X   X X . . . . X X
+// . X . . . . X .   . X . . . . X .
+// . X X X X X X .   . X X X X X X .
+extern const uint8_t demon_glyph_bmp[];

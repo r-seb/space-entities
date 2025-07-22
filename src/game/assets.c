@@ -195,3 +195,63 @@ const uint8_t asteroid_big_bmp[] = {0xe0, 0x01, 0xf0, 0x02, 0x18, 0x0f, 0x14, 0x
 // . X . . . X .
 // . . X X X . .
 const uint8_t asteroid_small_bmp[] = {0x3c, 0x46, 0x69, 0x31, 0x22, 0x1c};
+
+// 8x8               8x8
+// . X . . . . X .   . . X . . X . .
+// . . X . . X . .   . . X . . X . .
+// . X X X X X X .   . X X X X X X .
+// . X . X X . X .   . X X X X X X .
+// X X X X X X X X   X X X . . X X X
+// X . X . . X . X   X . X . . X . X
+// . . X X X X . .   . . X X X X . .
+// . . X . . X . .   . . X . . X . .
+const uint8_t alien_glyph_bmp[] = {
+    // Frame 0
+    0x42, 0x24, 0x7e, 0x5a, 0xff, 0xa5, 0xbd, 0x24,
+    // Frame 1
+    0x24, 0x24, 0x7e, 0x7e, 0xe7, 0xa5, 0xbd, 0x24};
+
+// 8x8               8x8
+// . . X X X . . .   . . X X X . . .
+// . X . . . X . .   . X X X X X . .
+// X . X . X . X .   X X . X . X X .
+// X . X . X . X .   X X . X . X X .
+// X . . . . . X .   X X X X X X X .
+// X . . . . . X .   X X X X X X X .
+// X X . X . X X .   X X X X X X X .
+// X . X . X . X .   X . X . X . X .
+const uint8_t ghost_glyph_bmp[] = {
+    // Frame 0
+    0x1c, 0x22, 0x55, 0x55, 0x41, 0x41, 0x6b, 0x55,
+    // Frame 1
+    0x1c, 0x3e, 0x6b, 0x6b, 0x7f, 0x7f, 0x7f, 0x55};
+
+// 8x8               8x8
+// X . . . . . . X   . . . . . . . .
+// X X . . . . X X   X X . . . . X X
+// X . X X X X . X   X . X X X X . X
+// X X X X X X X X   X X X X X X X X
+// X . . X X . . X   X x x X X x x X
+// X X X X X X X X   X X X X X X X X
+// . X X X X X X .   . X X X X X X .
+// X . X X X X . X   . . X X X X . .
+const uint8_t cat_glyph_bmp[] = {
+    // Frame 0
+    0x00, 0xc3, 0xbd, 0xff, 0xff, 0xff, 0x7e, 0x3c,
+    // Frame 1
+    0x81, 0xc3, 0xbd, 0xff, 0x99, 0xff, 0x7e, 0xbd};
+
+// 8x8               8x8
+// X . . . . . . X   X . . . . . . X
+// X . . . . . . X   X . . . . . . X
+// X X X X X X X X   X X X X X X X X
+// . X . X X . X .   . X . X X . X .
+// X X . X X . X X   X X X X X X X X
+// X X X X X X X X   X X . . . . X X
+// . X . . . . X .   . X . . . . X .
+// . X X X X X X .   . X X X X X X .
+const uint8_t demon_glyph_bmp[] = {
+    // Frame 0
+    0x81, 0x81, 0xff, 0x5a, 0xdb, 0xff, 0x42, 0x7e,
+    // Frame 1
+    0x81, 0x81, 0xff, 0x5a, 0xff, 0xc3, 0x42, 0x7e};

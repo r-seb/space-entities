@@ -54,6 +54,7 @@ typedef struct {
 void game_init();
 void game_system_tick(const Event* const e);
 void game_system_move();
+void game_system_spawn_random_entities();
 void game_system_keep_in_boundary();
 void game_system_draw(u8g2_t* oled);
 void game_system_animate();
@@ -68,3 +69,4 @@ void sm_player_ctor_call(state_comp_t* sm_instance);
 void sm_player_bullet_ctor_call(state_comp_t* sm_instance);
 void sm_cauldron_ctor_call(state_comp_t* sm_instance);
 void sm_mine_ctor_call(state_comp_t* sm_instance);
+void sm_asteroid_ctor_call(state_comp_t* sm_instance);
