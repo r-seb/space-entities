@@ -77,12 +77,12 @@ void game_init()
 
     ecs_entity_t player_ent = ecs_create_entity(&ecs, (PLAYER_TAG | KEEP_BOUNDED_TAG));
     ecs_entity_t cauldron_ent = ecs_create_entity(&ecs, (ENEMY_TAG));
-    ecs_entity_t crawler1_ent = ecs_create_entity(&ecs, (ENEMY_TAG));
-    ecs_entity_t crawler2_ent = ecs_create_entity(&ecs, (ENEMY_TAG));
+    ecs_entity_t crawler1_ent = ecs_create_entity(&ecs, (ENEMY_TAG | KEEP_BOUNDED_TAG));
+    ecs_entity_t crawler2_ent = ecs_create_entity(&ecs, (ENEMY_TAG | KEEP_BOUNDED_TAG));
 
     position_comp_t pos = {.x = 30.f, .y = 28.f};
     ecs_add_component(&ecs, player_ent, POSITION_COMP_ID, &pos);
-    pos = (position_comp_t) {.x = 100.f, .y = 22.f};
+    pos = (position_comp_t) {.x = 113.f, .y = 22.f};
     ecs_add_component(&ecs, cauldron_ent, POSITION_COMP_ID, &pos);
     pos = (position_comp_t) {.x = 117.f, .y = 5.f};
     ecs_add_component(&ecs, crawler1_ent, POSITION_COMP_ID, &pos);
@@ -91,9 +91,9 @@ void game_init()
 
     velocity_comp_t vel = {.dx = 0.f, .dy = 0.f};
     ecs_add_component(&ecs, player_ent, VELOCITY_COMP_ID, &vel);
-    vel = (velocity_comp_t) {.dx = 0.f, .dy = 0.f};
-    ecs_add_component(&ecs, cauldron_ent, VELOCITY_COMP_ID, &vel);
+    vel = (velocity_comp_t) {.dx = -.5f, .dy = -.5f};
     ecs_add_component(&ecs, crawler1_ent, VELOCITY_COMP_ID, &vel);
+    vel = (velocity_comp_t) {.dx = .5f, .dy = .5f};
     ecs_add_component(&ecs, crawler2_ent, VELOCITY_COMP_ID, &vel);
 
     health_comp_t hp = {.health = 3};
@@ -128,6 +128,12 @@ void game_init()
     ecs_add_component(&ecs, sm.entity, STATE_COMP_ID, &sm);
     sm = (state_comp_t) {.ecs = &ecs, .entity = cauldron_ent};
     sm_cauldron_ctor_call(&sm);
+    ecs_add_component(&ecs, sm.entity, STATE_COMP_ID, &sm);
+    sm = (state_comp_t) {.ecs = &ecs, .entity = crawler1_ent};
+    sm_crawler_ctor_call(&sm);
+    ecs_add_component(&ecs, sm.entity, STATE_COMP_ID, &sm);
+    sm = (state_comp_t) {.ecs = &ecs, .entity = crawler2_ent};
+    sm_crawler_ctor_call(&sm);
     ecs_add_component(&ecs, sm.entity, STATE_COMP_ID, &sm);
 }
 
@@ -213,8 +219,10 @@ void game_system_move()
         ecs_entity_t ent = ecs.components[POSITION_COMP_ID].set.dense[idx];
         velocity_comp_t* vel = ECS_GET_COMP_FROM_ENT(&ecs, VELOCITY_COMP_ID, ent, velocity_comp_t);
 
-        pos->x += vel->dx;
-        pos->y += vel->dy;
+        if (vel != NULL) {
+            pos->x += vel->dx;
+            pos->y += vel->dy;
+        }
     }
 }
 
