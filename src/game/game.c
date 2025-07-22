@@ -96,6 +96,9 @@ void game_init()
     ecs_add_component(&ecs, crawler1_ent, VELOCITY_COMP_ID, &vel);
     ecs_add_component(&ecs, crawler2_ent, VELOCITY_COMP_ID, &vel);
 
+    health_comp_t hp = {.health = 3};
+    ecs_add_component(&ecs, player_ent, HEALTH_COMP_ID, &hp);
+
     sprite_comp_t sprite = {.sprites = player_ship_bmp,
                             .animate_time_s = ANIMATE_TIME_S,
                             .frame_size = PLAYER_SHIP_BMP_FRAME_SIZE,
@@ -251,6 +254,22 @@ void game_system_draw(u8g2_t* oled)
     uint8_t ent_count = ecs.entities.count;
     snprintf_(str, sizeof(str), "Entities: %u", ent_count);
     u8g2_DrawStr(oled, 0, 10, str);
+
+    // Find player hp
+    uint8_t hp_count = ecs.components[HEALTH_COMP_ID].set.count;
+    ecs_entity_t ent;
+    health_comp_t* hp;
+    for (int idx = 0; idx < hp_count; ++idx) {
+        ent = ecs.components[HEALTH_COMP_ID].set.dense[idx];
+        if (ecs_get_entity_tag(&ecs, ent) & PLAYER_TAG) {
+            hp = ECS_GET_COMP_FROM_ENT(&ecs, HEALTH_COMP_ID, ent, health_comp_t);
+            // Draw player hp
+            for (uint8_t i = 0; i < hp->health; i++) {
+                u8g2_DrawGlyph(oled, 46 + (i * 12), OLED_HEIGHT, 0xe107);
+            }
+            break;
+        }
+    }
 
     uint8_t sp_count = ecs.components[SPRITE_COMP_ID].set.count;
     for (int idx = 0; idx < sp_count; ++idx) {

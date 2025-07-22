@@ -3,7 +3,7 @@
 #include "game/game.h"
 #include "state_machine.h"
 
-#define SHOOT_INTERVAL_S 0.3f
+#define SHOOT_INTERVAL_S 0.2f
 #define INVINCIBLE_INTERVAL_S 3.f
 
 // Function prototypes
@@ -76,7 +76,7 @@ static State sm_player_flying(state_comp_t* const me, Event const* const e)
                     ecs_add_component(me->ecs, bullet_ent, POSITION_COMP_ID, &pos);
 
                     // Velocity component
-                    velocity_comp_t vel = {.dx = 1.0f, .dy = 0.f};
+                    velocity_comp_t vel = {.dx = 2.0f, .dy = 0.f};
                     ecs_add_component(me->ecs, bullet_ent, VELOCITY_COMP_ID, &vel);
 
                     _shooting_interval_s = SHOOT_INTERVAL_S;
@@ -107,8 +107,13 @@ static State sm_player_flying(state_comp_t* const me, Event const* const e)
             state_stat = HANDLED_STATUS;
         } break;
         case COLLIDED_SIG: {
-            // TODO: Decrease health
             if (_invicible_time_s <= 0.f) {
+                // Decrease health
+                health_comp_t* hp =
+                    ECS_GET_COMP_FROM_ENT(me->ecs, HEALTH_COMP_ID, me->entity, health_comp_t);
+                hp->health = (hp->health == 0) ? 3 : (hp->health - 1);
+
+                // Set to invisible for a period of time
                 sprite_comp_t* sp =
                     ECS_GET_COMP_FROM_ENT(me->ecs, SPRITE_COMP_ID, me->entity, sprite_comp_t);
                 sp->frame_count = 4;
