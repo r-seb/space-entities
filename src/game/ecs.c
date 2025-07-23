@@ -196,9 +196,13 @@ void* ecs_get_component_from_idx(ecs_world_t* ecs, ecs_component_id_t comp_id, u
 void* ecs_get_component_from_entity(ecs_world_t* ecs, ecs_component_id_t comp_id,
                                     ecs_entity_t entity)
 {
-    if (ecs->components[comp_id].set.count > 0 && ecs_is_entity_alive(ecs, entity)) {
-        uint8_t idx = ecs->components[comp_id].set.sparse[entity_get_id(entity)];
-        return (uint8_t*)ecs->components[comp_id].data + idx * ecs->components[comp_id].data_size;
+    uint8_t id = entity_get_id(entity);
+    uint8_t data_idx = ecs->components[comp_id].set.sparse[id];
+
+    if (ecs->components[comp_id].set.count > 0 && ecs_is_entity_alive(ecs, entity) &&
+        (entity_get_id(ecs->components[comp_id].set.dense[data_idx]) == id)) {
+        return (uint8_t*)ecs->components[comp_id].data +
+            data_idx * ecs->components[comp_id].data_size;
     }
 
     return NULL;
