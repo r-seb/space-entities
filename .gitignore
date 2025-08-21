@@ -1,2 +1,8 @@
 Debug/
 .settings/
+test/build/
+test/cmocka/
+test/.clangd
+test/compile_commands.json
+test/.cache
+nav.md
